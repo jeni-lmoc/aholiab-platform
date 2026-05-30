@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import { 
   CheckCircle, 
@@ -30,7 +32,7 @@ interface Phase {
   tasks: Task[];
 }
 
-export default function ChurchChecklist() {
+export function SermonChecklist() {
   // --- STATE MANAGEMENT ---
   const [activeTab, setActiveTab] = useState<string>('midweek');
   const [evangelismMode, setEvangelismMode] = useState<boolean>(false);
@@ -315,7 +317,7 @@ export default function ChurchChecklist() {
                   <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-blue-500 rounded-t-lg" />
                 )}
 
-                {/* Newly Added Contextual Phase Titles */}
+                {/* Contextual Phase Titles */}
                 <span className={`text-xs font-bold uppercase tracking-widest mb-1.5 transition-colors duration-300 ${
                   isActive ? 'text-purple-400' : 'text-slate-500 group-hover:text-slate-400'
                 }`}>
@@ -335,7 +337,6 @@ export default function ChurchChecklist() {
 
                 <div className="mt-auto pt-2 border-t border-slate-800/60 flex flex-col gap-2 w-full">
                   <div className="flex items-center justify-between text-xs font-medium">
-                    {/* Appended Custom Wednesday Helper Math Display */}
                     <span className="text-slate-400">
                       {phase.deadline} {phase.isMidweek && getWednesdayDateString()}
                     </span>
@@ -344,7 +345,7 @@ export default function ChurchChecklist() {
                     </span>
                   </div>
 
-                  {/* Restored Visual Phase Progress Slider Indicators */}
+                  {/* Visual Phase Progress Slider Indicators */}
                   <div className="w-full h-1.5 bg-slate-950 rounded-full overflow-hidden border border-slate-900">
                     <div 
                       className={`h-full rounded-full transition-all duration-300 ${
