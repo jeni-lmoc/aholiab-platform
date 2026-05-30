@@ -15,7 +15,6 @@ import {
   Send,
   CheckCircle2,
   Edit2,
-  Palette,
 } from "lucide-react";
 
 interface ChecklistItem {
@@ -81,7 +80,7 @@ const workflowTabs: WorkflowTab[] = [
   },
 ];
 
-const STORAGE_KEY = "aholiab-checklist-state-v7";
+const STORAGE_KEY = "aholiab-checklist-state-v8";
 const EVANGELISM_KEY = "aholiab-evangelism-toggle";
 const FONT_SIZE_KEY = "aholiab-global-font-size";
 const THEME_KEY = "aholiab-global-theme";
@@ -107,7 +106,6 @@ export function SermonChecklist() {
     if (savedEvangelism) setIsEvangelismSabbath(JSON.parse(savedEvangelism));
     if (savedFontSize === "S" || savedFontSize === "M" || savedFontSize === "L") setFontSize(savedFontSize);
     
-    // Migrated old Dawn/Twilight names seamlessly to Light/Dark
     if (savedTheme === "Light" || savedTheme === "Dawn") setCurrentTheme("Light");
     else if (savedTheme === "Dark" || savedTheme === "Twilight" || savedTheme === "Cyber") setCurrentTheme("Dark");
 
@@ -175,7 +173,6 @@ export function SermonChecklist() {
 
   const masterProgress = getMasterProgress();
 
-  // --- RECONSTRUCTED CLEAN DUAL THEME CONFIGURATIONS ---
   const themeStyles = {
     Dark: {
       bg: "bg-[#0a0b1e] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-[#0a0b1e] to-black text-slate-100 selection:bg-sky-500/30",
@@ -192,7 +189,6 @@ export function SermonChecklist() {
       progressTitle: "text-sky-400/90",
       progressBar: "from-sky-600 via-blue-500 to-sky-400 shadow-[0_0_20px_rgba(14,165,233,0.3)]",
       
-      // FIXED TABS DIRECTORY (DARK)
       tabUnselected: "border-slate-900 bg-slate-950/60 text-slate-400 shadow-inner",
       tabActive: "bg-[#0f1430] border-sky-400 text-white shadow-[0_0_25px_rgba(56,189,248,0.2)]",
       tabPhaseText: "text-slate-500 group-data-[state=active]:text-sky-400 font-extrabold",
@@ -226,14 +222,13 @@ export function SermonChecklist() {
       progressTitle: "text-blue-600",
       progressBar: "from-blue-600 via-indigo-500 to-purple-600 shadow-none",
       
-      // FIXED TABS DIRECTORY (LIGHT)
       tabUnselected: "border-slate-200 bg-slate-100 text-slate-400",
       tabActive: "bg-white border-blue-500 text-slate-950 shadow-lg shadow-blue-900/5",
       tabPhaseText: "text-slate-400 group-data-[state=active]:text-blue-600 font-extrabold",
       tabMainText: "text-slate-600 group-data-[state=active]:text-slate-950",
       tabMetricsBox: "bg-slate-200 group-data-[state=active]:bg-blue-100 group-data-[state=active]:text-blue-700 group-data-[state=active]:border-blue-300",
       tabProgressTrack: "bg-slate-200",
-      tabProgressBar: "bg-blue-600", // Explicit fixed visible high-contrast rail color
+      tabProgressBar: "bg-blue-600",
       
       workspaceCard: "bg-white border-slate-300 shadow-2xl",
       workspaceHeader: "text-blue-600 border-slate-200",
@@ -247,7 +242,6 @@ export function SermonChecklist() {
     }
   }[currentTheme];
 
-  // --- ACCESS CONTROL MASTER SIZES ---
   const fontStyles = {
     S: {
       pageTitle: "text-2xl md:text-3xl",
@@ -310,7 +304,6 @@ export function SermonChecklist() {
   return (
     <div className={`min-h-screen transition-all duration-500 overflow-x-hidden ${themeStyles.bg} ${fontStyles.S}`}>
       
-      {/* Background Lights */}
       {currentTheme === "Dark" && (
         <>
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/10 blur-[120px] pointer-events-none" />
@@ -320,7 +313,6 @@ export function SermonChecklist() {
 
       <div className="max-w-4xl mx-auto px-4 py-12 relative z-10 space-y-5">
         
-        {/* Header Console Badge */}
         <div className="text-center">
           <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-[10px] font-black tracking-[0.2em] uppercase transition-all duration-300 ${themeStyles.badge}`}>
              <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${themeStyles.badgeDot}`} />
@@ -328,13 +320,11 @@ export function SermonChecklist() {
           </div>
         </div>
 
-        {/* Master Labels Header */}
         <div className="space-y-4 text-center">
           <h1 className={`${fontStyles.pageTitle} font-black tracking-tighter drop-shadow-2xl transition-colors`}>
             Aholiab Sermon Workflow
           </h1>
 
-          {/* Target Calendar Date Input Frame */}
           <div className={`flex flex-col items-center justify-center gap-1 p-4 rounded-2xl max-w-xl mx-auto border transition-all duration-300 ${themeStyles.headerBlock}`}>
             <div className="flex items-center gap-3">
                <span className={`${fontStyles.dateLabel} font-bold uppercase tracking-widest`}>Target Service Date</span>
@@ -361,9 +351,6 @@ export function SermonChecklist() {
           </div>
         </div>
 
-        {/* --- PANEL DECK LAYOUTS --- */}
-        
-        {/* Control Row 1: Operations */}
         <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl border backdrop-blur-xl transition-all duration-300 ${themeStyles.cardBg}`}>
           <div className="flex items-center gap-4">
              <Switch id="evangelism-mode" checked={isEvangelismSabbath} onCheckedChange={setIsEvangelismSabbath} className={`scale-110 ${themeStyles.toggleColor}`} />
@@ -374,9 +361,7 @@ export function SermonChecklist() {
           </Button>
         </div>
 
-        {/* Control Row 2: User Personalizations Switchers */}
         <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-2xl border backdrop-blur-xl transition-all duration-300 ${themeStyles.cardBg}`}>
-          {/* Scale Buttons Container */}
           <div className="flex items-center justify-between md:justify-start gap-3 w-full">
             <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 mr-2">Font Scale:</span>
             <div className="flex gap-1.5 bg-black/20 p-1 rounded-lg border border-white/5">
@@ -394,7 +379,6 @@ export function SermonChecklist() {
             </div>
           </div>
 
-          {/* Formatted Simplified Light/Dark Toggle Row */}
           <div className="flex items-center justify-between md:justify-end gap-3 w-full border-t md:border-t-0 md:border-l border-white/5 pt-3 md:pt-0 md:pl-4">
             <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 mr-2">Console Theme:</span>
             <div className="flex gap-1.5 bg-black/20 p-1 rounded-lg border border-white/5">
@@ -413,7 +397,6 @@ export function SermonChecklist() {
           </div>
         </div>
 
-        {/* Master Meter Panel Progress Gauge */}
         <div className={`backdrop-blur-md rounded-2xl border p-5 transition-all duration-300 ${themeStyles.progressBox}`}>
           <div className="flex items-center justify-between mb-3">
             <span className={`${fontStyles.progressTitle} font-black uppercase tracking-[0.2em]`}>Overall Weekly Progress</span>
@@ -427,9 +410,7 @@ export function SermonChecklist() {
           </div>
         </div>
 
-        {/* Workflow Channels Area */}
         <Tabs defaultValue="backdrops-theme" className="w-full">
-          {/* EQUAL-HEIGHT COMPACT RESPONSIVE UNIFORM GRID RAIL */}
           <TabsList className="w-full h-auto grid grid-cols-1 md:grid-cols-4 gap-2 bg-transparent mb-6 p-0 items-stretch">
             {workflowTabs.map((tab) => {
               const progress = getTabProgress(tab);
@@ -439,13 +420,11 @@ export function SermonChecklist() {
                   value={tab.id} 
                   className={`w-full h-full flex flex-col items-start justify-between p-4 rounded-xl border text-left whitespace-normal break-words transition-all duration-200 group ${themeStyles.tabUnselected} data-[state=active]:${themeStyles.tabActive}`}
                 >
-                   {/* Top Small Phase Label */}
                    <div className="w-full">
                      <span className={`text-[10px] font-black uppercase tracking-widest block mb-1.5 transition-colors ${themeStyles.tabPhaseText}`}>
                        {tab.phaseTitle}
                      </span>
                      
-                     {/* Center Graphic Row */}
                      <div className="flex items-start gap-2 w-full mb-3">
                         <div className="mt-0.5 shrink-0 opacity-70 group-data-[state=active]:opacity-100">
                           {tab.icon}
@@ -456,7 +435,6 @@ export function SermonChecklist() {
                      </div>
                    </div>
 
-                   {/* Underneath Operational Deadlines */}
                    <div className="w-full mt-auto">
                      <div className="w-full pt-2.5 border-t border-black/5 dark:border-white/5 flex items-center justify-between font-bold text-[11px] transition-colors">
                         <span className={`${fontStyles.tabSub} opacity-70`}>
@@ -469,7 +447,6 @@ export function SermonChecklist() {
                         )}
                      </div>
 
-                     {/* FIXED EXPLICIT HIGH-CONTRAST TAB LINE RAIL PROGRESS INDICATOR */}
                      <div className={`w-full mt-2.5 h-1.5 rounded-full overflow-hidden p-[1px] ${themeStyles.tabProgressTrack}`}>
                         <div className={`h-full rounded-full transition-all duration-500 ${themeStyles.tabProgressBar}`} style={{ width: `${progress.percentage}%` }} />
                      </div>
@@ -479,7 +456,6 @@ export function SermonChecklist() {
             })}
           </TabsList>
 
-          {/* Checklists Operational Boards */}
           {workflowTabs.map((tab) => {
             const progress = getTabProgress(tab);
             const visibleItems = tab.items.filter(item => !(isEvangelismSabbath && item.isAfterglowRelated));
@@ -489,13 +465,12 @@ export function SermonChecklist() {
                 <Card className={`backdrop-blur-2xl border rounded-2xl overflow-hidden transition-all duration-500 shadow-2xl ${themeStyles.workspaceCard}`}>
                   <CardContent className="p-4 md:p-6 space-y-3">
                     
-                    {/* Interior Category Header */}
+                    {/* Fixed: Changed "Stage Score" strictly to "Phase Progress" */}
                     <div className={`flex items-center justify-between mb-1 border-b pb-3 ${themeStyles.workspaceHeader}`}>
                        <h3 className={`${fontStyles.cardHeader} font-black uppercase tracking-widest`}>{tab.label} Checklist</h3>
-                       <div className="text-[10px] font-black tracking-wider uppercase opacity-80 bg-black/10 px-3 py-1 rounded-full">{progress.percentage}% Stage Score</div>
+                       <div className="text-[10px] font-black tracking-wider uppercase opacity-80 bg-black/10 px-3 py-1 rounded-full">{progress.percentage}% Phase Progress</div>
                     </div>
 
-                    {/* Checkbox Records Generator */}
                     {visibleItems.map((item) => (
                       <label 
                         key={item.id} 
@@ -505,7 +480,6 @@ export function SermonChecklist() {
                             : themeStyles.taskItem
                         }`}
                       >
-                        {/* Control Assembly Box */}
                         <div className="pt-0.5 shrink-0">
                           <Checkbox 
                             id={item.id} 
@@ -531,7 +505,6 @@ export function SermonChecklist() {
           })}
         </Tabs>
 
-        {/* ENLARGED HIGH-CONTRAST STATIC BIBLE FOOTER */}
         <div className={`mt-12 text-center border-t transition-all duration-500 px-6 py-10 rounded-2xl shadow-inner ${themeStyles.footerBox}`}>
            <p className={`${fontStyles.footerScripture} italic font-serif tracking-wide leading-relaxed`}>
              &quot;And I have filled him with the Spirit of God, in wisdom, and in understanding, and in knowledge...&quot;
