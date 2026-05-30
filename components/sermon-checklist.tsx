@@ -331,3 +331,221 @@ export function SermonChecklist() {
           <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-amber-600/5 blur-[120px] pointer-events-none" />
         </>
       )}
+
+      <div className="max-w-4xl mx-auto px-4 py-12 relative z-10 space-y-5">
+        
+        {/* Identity Badge Header Anchor */}
+        <div className="text-center">
+          <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-[10px] font-black tracking-[0.2em] uppercase transition-all duration-300 ${themeStyles.badge}`}>
+             <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${themeStyles.badgeDot}`} />
+             Slides Team Console
+          </div>
+        </div>
+
+        {/* Master Heading Rows */}
+        <div className="space-y-4 text-center">
+          <h1 className={`${fontStyles.pageTitle} font-black tracking-tighter drop-shadow-2xl transition-colors`}>
+            Aholiab Sermon Workflow
+          </h1>
+
+          {/* Large Target Calendar Date Matrix */}
+          <div className={`flex flex-col items-center justify-center gap-1 p-4 rounded-2xl max-w-xl mx-auto border transition-all duration-300 ${themeStyles.headerBlock}`}>
+            <div className="flex items-center gap-3">
+               <span className={`${fontStyles.dateLabel} font-bold uppercase tracking-widest`}>Target Service Date</span>
+               <button onClick={() => setIsEditingDate(true)} className="opacity-60 hover:opacity-100 transition-opacity">
+                  <Edit2 className="h-3.5 w-3.5" />
+               </button>
+            </div>
+            
+            {isEditingDate ? (
+              <input 
+                type="date" 
+                value={targetDate} 
+                onChange={(e) => setTargetDate(e.target.value)}
+                onBlur={() => setIsEditingDate(false)}
+                className="bg-slate-900 border-2 border-sky-400 rounded-xl px-4 py-1.5 text-white text-xl focus:outline-none"
+                autoFocus
+              />
+            ) : (
+              <div className={`${fontStyles.dateText} font-bold tracking-tight flex items-center gap-3`}>
+                <Calendar className="h-6 w-6 shrink-0 opacity-60" />
+                {formatDisplayDate(targetDate)}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* --- DYNAMIC SPLIT CONTROL LAYOUT --- */}
+        
+        {/* Card Row 1: Logic Controls (Evangelism & Reset Checklist) */}
+        <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl border backdrop-blur-xl transition-all duration-300 ${themeStyles.cardBg}`}>
+          <div className="flex items-center gap-4">
+             <Switch id="evangelism-mode" checked={isEvangelismSabbath} onCheckedChange={setIsEvangelismSabbath} className={`scale-110 ${themeStyles.toggleColor}`} />
+             <Label htmlFor="evangelism-mode" className={`${fontStyles.toggleText} font-bold cursor-pointer select-none`}>Evangelism Sabbath Mode</Label>
+          </div>
+          <Button variant="ghost" onClick={handleReset} className={`${fontStyles.btnText} h-9 px-4 font-black uppercase tracking-widest text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all`}>
+            <RotateCcw className="h-4 w-4 mr-2" /> Reset Checklist
+          </Button>
+        </div>
+
+        {/* Card Row 2: Preferences Controls (Font Size & Console Theme Switchers) */}
+        <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-2xl border backdrop-blur-xl transition-all duration-300 ${themeStyles.cardBg}`}>
+          {/* Font Resizer Slider Container */}
+          <div className="flex items-center justify-between md:justify-start gap-3 w-full">
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 md:mr-3">Font Scale:</span>
+            <div className="flex gap-1.5 bg-black/20 p-1 rounded-lg border border-white/5">
+              {["S", "M", "L"].map((s) => (
+                <button key={s} onClick={() => handleFontSizeChange(s as any)} className={`w-8 h-8 flex items-center justify-center rounded-lg font-black text-xs transition-all ${fontSize === s ? "bg-sky-500 text-white shadow-md" : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"}`}>{s}</button>
+              ))}
+            </div>
+          </div>
+
+          {/* Theme Selector Picker Row */}
+          <div className="flex items-center justify-between md:justify-end gap-3 w-full border-t md:border-t-0 md:border-l border-white/5 pt-3 md:pt-0 md:pl-4">
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 md:mr-2">Console Theme:</span>
+            <div className="flex gap-1 bg-black/20 p-1 rounded-lg border border-white/5">
+              {(["Dawn", "Sunset", "Twilight"] as const).map((t) => (
+                <button 
+                  key={t} 
+                  onClick={() => handleThemeChange(t)} 
+                  className={`px-3 py-1.5 text-[10px] font-black rounded-md transition-all uppercase tracking-wide ${
+                    currentTheme === t 
+                      ? "bg-purple-600 text-white shadow-sm" 
+                      : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  }`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Global Progress Metrics Monitor Panel */}
+        <div className={`backdrop-blur-md rounded-2xl border p-5 transition-all duration-300 ${themeStyles.progressBox}`}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={`${fontStyles.progressTitle} font-black uppercase tracking-[0.2em]`}>Overall Weekly Progress</span>
+            <div className="flex items-baseline gap-2">
+              <span className={`${fontStyles.progressPct} font-black`}>{masterProgress.percentage}%</span>
+              <span className={`${fontStyles.progressCounts} opacity-60 font-medium`}>({masterProgress.completed}/{masterProgress.total} Tasks)</span>
+            </div>
+          </div>
+          <div className="h-3 bg-black/30 rounded-full p-0.5 border border-white/5">
+            <div className={`h-full rounded-full bg-gradient-to-r transition-all duration-1000 ${themeStyles.progressBar}`} style={{ width: `${masterProgress.percentage}%` }} />
+          </div>
+        </div>
+
+        {/* Workflow Routing Matrices Section */}
+        <Tabs defaultValue="backdrops-theme" className="w-full">
+          {/* Re-Inverted, High-Contrast Selected State Navigation List Layout */}
+          <TabsList className="w-full h-auto flex flex-col md:flex-row gap-2 bg-transparent mb-6 p-0">
+            {workflowTabs.map((tab) => {
+              const progress = getTabProgress(tab);
+              return (
+                <TabsTrigger 
+                  key={tab.id} 
+                  value={tab.id} 
+                  className={`flex-1 w-full md:w-auto flex flex-col items-start p-4 rounded-xl border text-left whitespace-normal break-words transition-all duration-300 group ${themeStyles.tabUnselected} data-[state=active]:${themeStyles.tabActive}`}
+                >
+                   {/* Top Small Phase Scope Title Flag */}
+                   <span className={`${fontStyles.tabPhase} font-black uppercase tracking-widest block mb-1 ${themeStyles.tabPhaseText}`}>
+                     {tab.phaseTitle}
+                   </span>
+                   
+                   {/* Central Grid Row */}
+                   <div className="flex items-start gap-2 w-full">
+                      <div className="mt-0.5 shrink-0 transition-colors">
+                        {tab.icon}
+                      </div>
+                      <span className={`${fontStyles.tabMain} font-black leading-tight ${themeStyles.tabMainText}`}>
+                        {tab.label}
+                      </span>
+                   </div>
+
+                   {/* Count Metadata Displays with dynamic calendar calculation values */}
+                   <div className="w-full mt-auto pt-3 flex items-center justify-between font-semibold opacity-80 text-[11px]">
+                      <span className={fontStyles.tabSub}>
+                        {tab.sublabel} {tab.id === "backdrops-theme" && getWednesdayDateString()}
+                      </span>
+                      {progress.total > 0 && (
+                        <span className={`${fontStyles.tabSub} font-black px-1.5 py-0.5 rounded transition-colors bg-black/20`}>
+                          {progress.completed}/{progress.total}
+                        </span>
+                      )}
+                   </div>
+
+                   {/* Internal Baseline Indicators */}
+                   <div className="w-full mt-2 h-1 bg-black/20 rounded-full overflow-hidden">
+                      <div className="h-full bg-current transition-all duration-500 opacity-60" style={{ width: `${progress.percentage}%` }} />
+                   </div>
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
+
+          {/* Embedded Content Workspace Hub Module */}
+          {workflowTabs.map((tab) => {
+            const progress = getTabProgress(tab);
+            const visibleItems = tab.items.filter(item => !(isEvangelismSabbath && item.isAfterglowRelated));
+            return (
+              <TabsContent key={tab.id} value={tab.id} className="focus:outline-none">
+                
+                <Card className={`backdrop-blur-2xl border rounded-2xl overflow-hidden transition-all duration-500 shadow-2xl ${themeStyles.workspaceCard}`}>
+                  <CardContent className="p-4 md:p-6 space-y-3">
+                    
+                    {/* Interior Context Header Block */}
+                    <div className={`flex items-center justify-between mb-1 border-b pb-3 ${themeStyles.workspaceHeader}`}>
+                       <h3 className={`${fontStyles.cardHeader} font-black uppercase tracking-widest`}>{tab.label} Checklist</h3>
+                       <div className="text-[10px] font-black tracking-wider uppercase opacity-80 bg-black/10 px-3 py-1 rounded-full">{progress.percentage}% Stage Score</div>
+                    </div>
+
+                    {/* Sequential Checkbox Rows */}
+                    {visibleItems.map((item) => (
+                      <label 
+                        key={item.id} 
+                        className={`flex items-start gap-4 p-4 rounded-xl border transition-all duration-200 cursor-pointer select-none group/item ${
+                          checkedItems[item.id] 
+                            ? themeStyles.checkboxBorder && themeStyles.taskItemChecked
+                            : themeStyles.taskItem
+                        }`}
+                      >
+                        {/* Interactive Checkbox Control Block */}
+                        <div className="pt-0.5 shrink-0">
+                          <Checkbox 
+                            id={item.id} 
+                            checked={checkedItems[item.id] || false} 
+                            onCheckedChange={(c) => handleCheck(item.id, c === true)} 
+                            className={`w-5 h-5 rounded-md border-2 transition-all bg-slate-900 ${themeStyles.checkboxBorder}`} 
+                          />
+                        </div>
+                        <div className="space-y-1 w-full">
+                           <div className={`${fontStyles.taskTitle} font-black tracking-tight transition-all ${checkedItems[item.id] ? "text-slate-500 line-through opacity-60" : themeStyles.taskText}`}>
+                             {item.title}
+                           </div>
+                           <div className={`${fontStyles.taskDesc} font-medium leading-relaxed ${checkedItems[item.id] ? "text-slate-600 opacity-40" : themeStyles.taskDesc}`}>
+                             {item.description}
+                           </div>
+                        </div>
+                      </label>
+                    ))}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            );
+          })}
+        </Tabs>
+
+        {/* Fully Clean, Migraine-Safe Static Bible Epilogue Card (Hover Animations Disabled) */}
+        <div className={`pt-6 mt-12 text-center border-t transition-all duration-500 px-4 py-6 rounded-2xl border-white/5 ${themeStyles.footerBox}`}>
+           <p className={`${fontStyles.footerScripture} italic font-serif tracking-wide leading-relaxed`}>
+             &quot;And I have filled him with the Spirit of God, in wisdom, and in understanding, and in knowledge...&quot;
+           </p>
+           <p className={`${fontStyles.footerRef} font-black uppercase mt-2 tracking-[0.2em] ${themeStyles.footerRef}`}>
+             — Exodus 31:3 <span className="font-sans font-bold lowercase opacity-70 ml-1">(Aholiab&apos;s calling)</span>
+           </p>
+        </div>
+
+      </div>
+    </div>
+  );
+}
