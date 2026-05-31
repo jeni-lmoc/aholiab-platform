@@ -81,7 +81,7 @@ const workflowTabs: WorkflowTab[] = [
   },
 ];
 
-const STORAGE_KEY = "aholiab-checklist-state-v13";
+const STORAGE_KEY = "aholiab-checklist-state-v14";
 const EVANGELISM_KEY = "aholiab-evangelism-toggle";
 const FONT_SIZE_KEY = "aholiab-global-font-size";
 const THEME_KEY = "aholiab-global-theme";
@@ -110,11 +110,17 @@ export function SermonChecklist() {
     if (savedTheme === "Light" || savedTheme === "Dawn") setCurrentTheme("Light");
     else if (savedTheme === "Dark" || savedTheme === "Twilight" || savedTheme === "Cyber") setCurrentTheme("Dark");
 
+    // STRICT SABBATH DATE CALCULATION ENGINE
     const today = new Date();
-    const daysUntilSaturday = (6 - today.getDay() + 7) % 7;
-    const nextSaturday = new Date(today);
-    nextSaturday.setDate(today.getDate() + (daysUntilSaturday === 0 ? 7 : daysUntilSaturday));
-    setTargetDate(nextSaturday.toISOString().split("T")[0]);
+    const currentDayOfWeek = today.getDay(); // 0 = Sunday, 6 = Saturday
+    
+    // Calculate how many days to add to get to Saturday (6)
+    // If today is Saturday (6), daysUntilSaturday will be 0, keeping it locked to today.
+    const daysUntilSaturday = (6 - currentDayOfWeek + 7) % 7;
+    
+    const targetSabbath = new Date(today);
+    targetSabbath.setDate(today.getDate() + daysUntilSaturday);
+    setTargetDate(targetSabbath.toISOString().split("T")[0]);
 
     setMounted(true);
   }, []);
