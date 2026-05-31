@@ -81,7 +81,7 @@ const workflowTabs: WorkflowTab[] = [
   },
 ];
 
-const STORAGE_KEY = "aholiab-checklist-state-v15";
+const STORAGE_KEY = "aholiab-checklist-state-v16";
 const EVANGELISM_KEY = "aholiab-evangelism-toggle";
 const FONT_SIZE_KEY = "aholiab-global-font-size";
 const THEME_KEY = "aholiab-global-theme";
@@ -110,21 +110,25 @@ export function SermonChecklist() {
     if (savedTheme === "Light" || savedTheme === "Dawn") setCurrentTheme("Light");
     else if (savedTheme === "Dark" || savedTheme === "Twilight" || savedTheme === "Cyber") setCurrentTheme("Dark");
 
-    // BULLETPROOF SABBATH HARD-LOCK LOGIC
+    // STRICT LOCAL TIME ZONE CALCULATION ENGINE
     const today = new Date();
     const currentDay = today.getDay(); // 0 = Sunday, 6 = Saturday
     const targetSabbath = new Date(today);
 
     if (currentDay === 6) {
-      // If it's Saturday, stay completely locked onto today
       targetSabbath.setDate(today.getDate());
     } else {
-      // If it's Sunday (0) through Friday (5), advance forward to the upcoming Saturday
       const daysUntilSaturday = 6 - currentDay;
       targetSabbath.setDate(today.getDate() + daysUntilSaturday);
     }
 
-    setTargetDate(targetSabbath.toISOString().split("T")[0]);
+    // Explicitly formatting string manually using local calendar numbers 
+    // to bypass the UTC auto-advance midnight glitch!
+    const localYear = targetSabbath.getFullYear();
+    const localMonth = String(targetSabbath.getMonth() + 1).padStart(2, "0");
+    const localDay = String(targetSabbath.getDate()).padStart(2, "0");
+    
+    setTargetDate(`${localYear}-${localMonth}-${localDay}`);
     setMounted(true);
   }, []);
 
