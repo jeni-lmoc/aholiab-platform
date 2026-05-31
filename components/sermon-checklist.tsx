@@ -15,6 +15,7 @@ import {
   Send,
   CheckCircle2,
   Edit2,
+  Globe,
 } from "lucide-react";
 
 interface ChecklistItem {
@@ -57,20 +58,8 @@ const workflowTabs: WorkflowTab[] = [
     ],
   },
   {
-    id: "study-guides-sites",
-    phaseTitle: "During Service",
-    label: "Study Guides & Sites",
-    sublabel: "Due End of Service",
-    icon: <BookOpen className="h-4 w-4" />,
-    items: [
-      { id: "afterglow-study", title: "Afterglow Study Guide", description: "Create the Afterglow study materials and slides.", isAfterglowRelated: true },
-      { id: "extended-study", title: "6-Day Extended Study Guide", description: "Create the extended study materials for the week." },
-      { id: "website", title: "Sites", description: "Upload the sermon video link, the main slide deck, the study guides, and the combined PDF to the site." },
-    ],
-  },
-  {
     id: "qr-codes",
-    phaseTitle: "Post-Service",
+    phaseTitle: "During/Post Service",
     label: "QR Codes",
     sublabel: "Due Immediately Post-Service",
     icon: <Send className="h-4 w-4" />,
@@ -78,9 +67,20 @@ const workflowTabs: WorkflowTab[] = [
       { id: "qr-code", title: "QR Codes", description: "Create PDFs, combine them, compress to under 20MB, upload, and generate QR code." },
     ],
   },
+  {
+    id: "site-update",
+    phaseTitle: "Post-Service",
+    label: "Site Update",
+    sublabel: "Due ASAP Post-Service",
+    icon: <Globe className="h-4 w-4" />,
+    items: [
+      { id: "website-resources", title: "Resource Uploads", description: "Upload the main slide deck, the study guides, and the combined PDF package to the site." },
+      { id: "youtube-swap", title: "Sermon YouTube Link Update", description: "Replace the live stream archive container with the finalized, edited sermon-only YouTube video link (typically 1-2 days post-service)." },
+    ],
+  },
 ];
 
-const STORAGE_KEY = "aholiab-checklist-state-v8";
+const STORAGE_KEY = "aholiab-checklist-state-v9";
 const EVANGELISM_KEY = "aholiab-evangelism-toggle";
 const FONT_SIZE_KEY = "aholiab-global-font-size";
 const THEME_KEY = "aholiab-global-theme";
@@ -411,6 +411,7 @@ export function SermonChecklist() {
         </div>
 
         <Tabs defaultValue="backdrops-theme" className="w-full">
+          {/* EQUAL HEIGHT BOX GRID */}
           <TabsList className="w-full h-auto grid grid-cols-1 md:grid-cols-4 gap-2 bg-transparent mb-6 p-0 items-stretch">
             {workflowTabs.map((tab) => {
               const progress = getTabProgress(tab);
@@ -465,8 +466,7 @@ export function SermonChecklist() {
                 <Card className={`backdrop-blur-2xl border rounded-2xl overflow-hidden transition-all duration-500 shadow-2xl ${themeStyles.workspaceCard}`}>
                   <CardContent className="p-4 md:p-6 space-y-3">
                     
-                    {/* Fixed: Changed "Stage Score" strictly to "Phase Progress" */}
-                    <div className={`flex items-center justify-between mb-1 border-b pb-3 ${themeStyles.workspaceHeader}`}>
+                    <div className="flex items-center justify-between mb-1 border-b pb-3 ${themeStyles.workspaceHeader}`}>
                        <h3 className={`${fontStyles.cardHeader} font-black uppercase tracking-widest`}>{tab.label} Checklist</h3>
                        <div className="text-[10px] font-black tracking-wider uppercase opacity-80 bg-black/10 px-3 py-1 rounded-full">{progress.percentage}% Phase Progress</div>
                     </div>
