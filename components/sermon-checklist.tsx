@@ -60,7 +60,7 @@ const workflowTabs: WorkflowTab[] = [
     id: "during-service",
     phaseTitle: "During Service",
     label: "Study Guides, QR Codes, & Sites",
-    sublabel: "Due at End of Service",
+    sublabel: "Due by the End of Service",
     icon: <BookOpen className="h-4 w-4" />,
     items: [
       { id: "afterglow-study", title: "Afterglow Study Guide", description: "Create the Afterglow study materials and slides.", isAfterglowRelated: true },
@@ -81,7 +81,7 @@ const workflowTabs: WorkflowTab[] = [
   },
 ];
 
-const STORAGE_KEY = "aholiab-checklist-state-v12";
+const STORAGE_KEY = "aholiab-checklist-state-v13";
 const EVANGELISM_KEY = "aholiab-evangelism-toggle";
 const FONT_SIZE_KEY = "aholiab-global-font-size";
 const THEME_KEY = "aholiab-global-theme";
@@ -412,7 +412,6 @@ export function SermonChecklist() {
         </div>
 
         <Tabs defaultValue="backdrops-theme" className="w-full">
-          {/* STRICT COMPACT UNIFORM GRID RAIL */}
           <TabsList className="w-full h-auto grid grid-cols-1 md:grid-cols-4 gap-2 bg-transparent mb-6 p-0 items-stretch">
             {workflowTabs.map((tab) => {
               const progress = getTabProgress(tab);
@@ -423,12 +422,10 @@ export function SermonChecklist() {
                   className={`w-full h-full flex flex-col items-start justify-between p-4 rounded-xl border text-left whitespace-normal break-words transition-all duration-200 group ${themeStyles.tabUnselected} data-[state=active]:${themeStyles.tabActive}`}
                 >
                    <div className="w-full">
-                     {/* 1) WHEN */}
                      <span className={`text-[10px] font-black uppercase tracking-widest block mb-1.5 transition-colors ${themeStyles.tabPhaseText}`}>
                        {tab.phaseTitle}
                      </span>
                      
-                     {/* 2) WHAT */}
                      <div className="flex items-start gap-2 w-full mb-3">
                         <div className="mt-0.5 shrink-0 opacity-70 group-data-[state=active]:opacity-100">
                           {tab.icon}
@@ -441,11 +438,9 @@ export function SermonChecklist() {
 
                    <div className="w-full mt-auto">
                      <div className="w-full pt-2.5 border-t border-black/5 dark:border-white/5 flex items-center justify-between font-bold text-[11px] transition-colors">
-                        {/* 3) DEADLINE */}
                         <span className={`${fontStyles.tabSub} opacity-70`}>
                           {tab.sublabel} {tab.id === "backdrops-theme" && getWednesdayDateString()}
                         </span>
-                        {/* 4) NUMBER OF TASKS */}
                         {progress.total > 0 && (
                           <span className={`text-[11px] font-black px-1.5 py-0.5 rounded-md border transition-colors ${themeStyles.tabMetricsBox}`}>
                             {progress.completed}/{progress.total}
@@ -453,7 +448,6 @@ export function SermonChecklist() {
                         )}
                      </div>
 
-                     {/* Progress Rail */}
                      <div className={`w-full mt-2.5 h-1.5 rounded-full overflow-hidden p-[1px] ${themeStyles.tabProgressTrack}`}>
                         <div className={`h-full rounded-full transition-all duration-500 ${themeStyles.tabProgressBar}`} style={{ width: `${progress.percentage}%` }} />
                      </div>
