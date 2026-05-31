@@ -411,7 +411,6 @@ export function SermonChecklist() {
         </div>
 
         <Tabs defaultValue="backdrops-theme" className="w-full">
-          {/* EQUAL HEIGHT BOX GRID */}
           <TabsList className="w-full h-auto grid grid-cols-1 md:grid-cols-4 gap-2 bg-transparent mb-6 p-0 items-stretch">
             {workflowTabs.map((tab) => {
               const progress = getTabProgress(tab);
@@ -466,7 +465,8 @@ export function SermonChecklist() {
                 <Card className={`backdrop-blur-2xl border rounded-2xl overflow-hidden transition-all duration-500 shadow-2xl ${themeStyles.workspaceCard}`}>
                   <CardContent className="p-4 md:p-6 space-y-3">
                     
-                    <div className="flex items-center justify-between mb-1 border-b pb-3 ${themeStyles.workspaceHeader}`}>
+                    {/* Fixed Syntax Error Line Here */}
+                    <div className={`flex items-center justify-between mb-1 border-b pb-3 ${themeStyles.workspaceHeader}`}>
                        <h3 className={`${fontStyles.cardHeader} font-black uppercase tracking-widest`}>{tab.label} Checklist</h3>
                        <div className="text-[10px] font-black tracking-wider uppercase opacity-80 bg-black/10 px-3 py-1 rounded-full">{progress.percentage}% Phase Progress</div>
                     </div>
