@@ -57,31 +57,31 @@ const workflowTabs: WorkflowTab[] = [
     ],
   },
   {
-    id: "study-guides-qr-sites",
+    id: "during-service",
     phaseTitle: "Post-Service",
-    label: "Study Guides, QR Codes & Sites",
+    label: "During Service",
     sublabel: "Due Immediately Post-Service",
     icon: <BookOpen className="h-4 w-4" />,
     items: [
       { id: "afterglow-study", title: "Afterglow Study Guide", description: "Create the Afterglow study materials and slides.", isAfterglowRelated: true },
       { id: "extended-study", title: "6-Day Extended Study Guide", description: "Create the extended study materials for the week." },
-      { id: "website", title: "Sites", description: "Upload the sermon video link, the main slide deck, the study guides, and the combined PDF to the site." },
       { id: "qr-code", title: "QR Codes", description: "Create PDFs, combine them, compress to under 20MB, upload, and generate QR code." },
+      { id: "website", title: "Sites", description: "Upload the sermon video link, the main slide deck, the study guides, and the combined PDF to the site." },
     ],
   },
   {
-    id: "site-update",
+    id: "post-service",
     phaseTitle: "Late-Week Prep",
-    label: "Site Update",
+    label: "Post-Service",
     sublabel: "Due ASAP Post-Service",
     icon: <Globe className="h-4 w-4" />,
     items: [
-      { id: "youtube-swap", title: "Sermon YouTube Link Update", description: "Replace the live stream archive container with the finalized, edited sermon-only YouTube video link (typically 1-2 days post-service)." },
+      { id: "youtube-swap", title: "Site Update", description: "Replace the live stream archive container with the finalized, edited sermon-only YouTube video link (typically 1-2 days post-service)." },
     ],
   },
 ];
 
-const STORAGE_KEY = "aholiab-checklist-state-v10";
+const STORAGE_KEY = "aholiab-checklist-state-v11";
 const EVANGELISM_KEY = "aholiab-evangelism-toggle";
 const FONT_SIZE_KEY = "aholiab-global-font-size";
 const THEME_KEY = "aholiab-global-theme";
@@ -260,7 +260,7 @@ export function SermonChecklist() {
       taskTitle: "text-sm",
       taskDesc: "text-xs",
       footerScripture: "text-base font-bold",
-      footerRef: "text-[10px]",
+      footerRef: "text-xs",
     },
     M: {
       pageTitle: "text-4xl md:text-5xl",
@@ -412,7 +412,7 @@ export function SermonChecklist() {
         </div>
 
         <Tabs defaultValue="backdrops-theme" className="w-full">
-          {/* EQUAL HEIGHT GRID RAIL */}
+          {/* EQUAL HEIGHT BALANCED GRID LIST */}
           <TabsList className="w-full h-auto grid grid-cols-1 md:grid-cols-4 gap-2 bg-transparent mb-6 p-0 items-stretch">
             {workflowTabs.map((tab) => {
               const progress = getTabProgress(tab);
