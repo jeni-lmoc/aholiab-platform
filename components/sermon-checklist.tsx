@@ -81,7 +81,7 @@ const workflowTabs: WorkflowTab[] = [
   },
 ];
 
-const STORAGE_KEY = "aholiab-checklist-state-v14";
+const STORAGE_KEY = "aholiab-checklist-state-v15";
 const EVANGELISM_KEY = "aholiab-evangelism-toggle";
 const FONT_SIZE_KEY = "aholiab-global-font-size";
 const THEME_KEY = "aholiab-global-theme";
@@ -110,18 +110,21 @@ export function SermonChecklist() {
     if (savedTheme === "Light" || savedTheme === "Dawn") setCurrentTheme("Light");
     else if (savedTheme === "Dark" || savedTheme === "Twilight" || savedTheme === "Cyber") setCurrentTheme("Dark");
 
-    // STRICT SABBATH DATE CALCULATION ENGINE
+    // BULLETPROOF SABBATH HARD-LOCK LOGIC
     const today = new Date();
-    const currentDayOfWeek = today.getDay(); // 0 = Sunday, 6 = Saturday
-    
-    // Calculate how many days to add to get to Saturday (6)
-    // If today is Saturday (6), daysUntilSaturday will be 0, keeping it locked to today.
-    const daysUntilSaturday = (6 - currentDayOfWeek + 7) % 7;
-    
+    const currentDay = today.getDay(); // 0 = Sunday, 6 = Saturday
     const targetSabbath = new Date(today);
-    targetSabbath.setDate(today.getDate() + daysUntilSaturday);
-    setTargetDate(targetSabbath.toISOString().split("T")[0]);
 
+    if (currentDay === 6) {
+      // If it's Saturday, stay completely locked onto today
+      targetSabbath.setDate(today.getDate());
+    } else {
+      // If it's Sunday (0) through Friday (5), advance forward to the upcoming Saturday
+      const daysUntilSaturday = 6 - currentDay;
+      targetSabbath.setDate(today.getDate() + daysUntilSaturday);
+    }
+
+    setTargetDate(targetSabbath.toISOString().split("T")[0]);
     setMounted(true);
   }, []);
 
