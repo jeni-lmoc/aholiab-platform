@@ -194,7 +194,6 @@ export function SermonChecklist() {
       dateLabel: "text-sky-400/80",
       cardBg: "border-slate-800/80 bg-slate-900/75 ring-1 ring-white/5 shadow-xl backdrop-blur-md",
       
-      // INVERTED GUARRDAIL BUTTON: Dark Gray base, switches to Red Warning color on active mouse hover
       btnUnselected: "bg-slate-950 text-slate-200 border-slate-800 hover:text-white hover:bg-rose-600 hover:border-rose-700 transition-colors duration-200",
       btnActive: "bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-md shadow-purple-900/20",
       toggleBox: "bg-slate-900/75 border-slate-800/80 text-sky-100 shadow-xl backdrop-blur-md",
@@ -207,6 +206,11 @@ export function SermonChecklist() {
       tabActive: "bg-slate-900/90 border-sky-400 text-white shadow-lg backdrop-blur-md",
       tabPhaseText: "text-slate-500 group-data-[state=active]:text-sky-400 font-extrabold",
       tabMainText: "text-slate-300 group-data-[state=active]:text-white",
+      
+      // BRAND NEW PROTECTION BACKING FOR LABELS ON SKY BLUE STYLE
+      tabLabelContainerActive: "bg-slate-950/80 border border-slate-800/50 px-2 py-1 rounded-lg shadow-inner w-full block",
+      tabLabelContainerInactive: "w-full block",
+
       tabMetricsBox: "bg-black/40 group-data-[state=active]:bg-sky-950 group-data-[state=active]:text-sky-400 group-data-[state=active]:border-sky-800",
       tabProgressTrack: "bg-black/40",
       tabProgressBar: "bg-gradient-to-r from-purple-500 to-sky-400",
@@ -219,7 +223,6 @@ export function SermonChecklist() {
       taskDesc: "text-slate-400",
       checkboxBorder: "border-slate-400 group-hover/item:border-sky-400 data-[state=checked]:bg-sky-400 data-[state=checked]:border-sky-400",
       
-      // HIGH CONTRAST TYPOGRAPHY LABELS FOR DARK GLASS TEXT HOUSING
       footerBox: "border-slate-800/80 bg-slate-900/75 shadow-xl backdrop-blur-md text-slate-300",
       footerScripture: "italic font-serif tracking-wide leading-relaxed text-slate-300",
       footerRef: "text-white"
@@ -244,6 +247,10 @@ export function SermonChecklist() {
       tabActive: "bg-white border-blue-500 text-slate-950 shadow-lg shadow-blue-900/5",
       tabPhaseText: "text-slate-400 group-data-[state=active]:text-blue-600 font-extrabold",
       tabMainText: "text-slate-600 group-data-[state=active]:text-slate-950",
+      
+      tabLabelContainerActive: "w-full block",
+      tabLabelContainerInactive: "w-full block",
+
       tabMetricsBox: "bg-slate-200 group-data-[state=active]:bg-blue-100 group-data-[state=active]:text-blue-700 group-data-[state=active]:border-blue-300",
       tabProgressTrack: "bg-slate-200",
       tabProgressBar: "bg-blue-600",
@@ -441,8 +448,15 @@ export function SermonChecklist() {
                         <div className="mt-0.5 shrink-0 opacity-70 group-data-[state=active]:opacity-100">
                           {tab.icon}
                         </div>
-                        <span className={`${fontStyles.tabMain} font-black leading-tight transition-colors ${themeStyles.tabMainText}`}>
-                          {tab.label}
+                        {/* WRAPPED MAIN LABELS IN DYNAMIC EMBEDDED BUTTON BACKING HOUSING */}
+                        <span className="w-full block group-data-[state=active]:p-0.5">
+                          <span className={`font-black leading-tight transition-all block ${
+                            currentTheme === "Dark"
+                              ? "group-data-[state=active]:bg-slate-950/80 group-data-[state=active]:border group-data-[state=active]:border-slate-800/80 group-data-[state=active]:px-2 group-data-[state=active]:py-1.5 group-data-[state=active]:rounded-lg group-data-[state=active]:shadow-inner group-data-[state=active]:text-sky-400"
+                              : "group-data-[state=active]:text-slate-950"
+                          } ${themeStyles.tabMainText}`}>
+                            {tab.label}
+                          </span>
                         </span>
                      </div>
                    </div>
