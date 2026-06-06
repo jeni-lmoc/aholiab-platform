@@ -65,7 +65,7 @@ const workflowTabs: WorkflowTab[] = [
     items: [
       { id: "afterglow-study", title: "Afterglow Study Guide", description: "Create the Afterglow study materials and slides.", isAfterglowRelated: true },
       { id: "extended-study", title: "6-Day Extended Study Guide", description: "Create the extended study materials for the week." },
-      { id: "qr-code", title: "QR Code Update", description: "Create PDFs, combine them, compress to under 20MB, upload, and save QR code update." },
+      { id: "qr-code", title: "QR Code Update", description: "Create PDFs, combine them, compress to under 20MB, upload, and save." },
       { id: "website", title: "Sites", description: "Upload the sermon video link, the main slide deck, the study guides, and the combined PDF to the site." },
     ],
   },
@@ -185,16 +185,17 @@ export function SermonChecklist() {
   const masterProgress = getMasterProgress();
 
   const themeStyles = {
-    // SOFTENED DARK NAVY GLASS HOUSING WITH REDUCED CONTRAST STARKNESS
     Dark: {
       bg: "bg-[#bfdbfe] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#e0f2fe] via-[#bae6fd] to-[#7dd3fc] text-slate-100 selection:bg-sky-500/30",
-      pageTitle: "text-slate-800 drop-shadow-sm", // Explicitly match Classic Light text color
+      pageTitle: "text-slate-800 drop-shadow-sm", 
       badge: "border-sky-500/20 bg-slate-900/60 text-sky-400 shadow-lg backdrop-blur-md",
       badgeDot: "bg-sky-400",
       headerBlock: "bg-slate-900/75 border-slate-800/80 text-white shadow-xl backdrop-blur-md",
       dateLabel: "text-sky-400/80",
       cardBg: "border-slate-800/80 bg-slate-900/75 ring-1 ring-white/5 shadow-xl backdrop-blur-md",
-      btnUnselected: "bg-slate-950/80 text-slate-200 border-slate-800 hover:text-white",
+      
+      // INVERTED GUARRDAIL BUTTON: Dark Gray base, switches to Red Warning color on active mouse hover
+      btnUnselected: "bg-slate-950 text-slate-200 border-slate-800 hover:text-white hover:bg-rose-600 hover:border-rose-700 transition-colors duration-200",
       btnActive: "bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-md shadow-purple-900/20",
       toggleBox: "bg-slate-900/75 border-slate-800/80 text-sky-100 shadow-xl backdrop-blur-md",
       toggleColor: "data-[state=checked]:bg-sky-400",
@@ -217,8 +218,11 @@ export function SermonChecklist() {
       taskText: "text-white",
       taskDesc: "text-slate-400",
       checkboxBorder: "border-slate-400 group-hover/item:border-sky-400 data-[state=checked]:bg-sky-400 data-[state=checked]:border-sky-400",
-      footerBox: "border-slate-800/80 bg-slate-900/75 text-slate-300 shadow-xl backdrop-blur-md",
-      footerRef: "text-slate-400"
+      
+      // HIGH CONTRAST TYPOGRAPHY LABELS FOR DARK GLASS TEXT HOUSING
+      footerBox: "border-slate-800/80 bg-slate-900/75 shadow-xl backdrop-blur-md text-slate-300",
+      footerScripture: "italic font-serif tracking-wide leading-relaxed text-slate-300",
+      footerRef: "text-white"
     },
     Light: {
       bg: "bg-gradient-to-b from-sky-300 via-[#f8fafc] to-[#fae8ff] text-slate-800 selection:bg-blue-200",
@@ -251,7 +255,8 @@ export function SermonChecklist() {
       taskText: "text-slate-800",
       taskDesc: "text-slate-500",
       checkboxBorder: "border-slate-400 group-hover/item:border-blue-500 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600",
-      footerBox: "border-slate-300 text-slate-600 bg-white/60 shadow-inner",
+      footerBox: "border-slate-300 shadow-inner bg-white/60 text-slate-600",
+      footerScripture: "italic font-serif tracking-wide leading-relaxed text-slate-600",
       footerRef: "text-slate-500"
     }
   }[currentTheme];
@@ -328,7 +333,7 @@ export function SermonChecklist() {
         </div>
 
         <div className="space-y-4 text-center">
-          <h1 className={`${fontStyles.pageTitle} font-black tracking-tighter transition-colors ${currentTheme === "Dark" ? "text-slate-800 drop-shadow-sm" : "text-slate-800 drop-shadow-sm"}`}>
+          <h1 className={`${fontStyles.pageTitle} font-black tracking-tighter transition-colors ${themeStyles.pageTitle}`}>
             Aholiab Sermon Workflow
           </h1>
 
@@ -363,7 +368,7 @@ export function SermonChecklist() {
              <Switch id="evangelism-mode" checked={isEvangelismSabbath} onCheckedChange={setIsEvangelismSabbath} className={`scale-110 ${themeStyles.toggleColor}`} />
              <Label htmlFor="evangelism-mode" className={`${fontStyles.toggleText} font-bold cursor-pointer select-none`}>Evangelism Sabbath Mode</Label>
           </div>
-          <Button variant="ghost" onClick={handleReset} className={`${fontStyles.btnText} h-9 px-4 font-black uppercase tracking-widest text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all`}>
+          <Button variant="outline" onClick={handleReset} className={`${fontStyles.btnText} h-9 px-4 font-black uppercase tracking-widest rounded-xl transition-all ${themeStyles.btnUnselected}`}>
             <RotateCcw className="h-4 w-4 mr-2" /> Reset Checklist
           </Button>
         </div>
@@ -377,7 +382,7 @@ export function SermonChecklist() {
                   key={s} 
                   onClick={() => handleFontSizeChange(s as any)} 
                   className={`w-9 h-8 flex items-center justify-center rounded-md font-black text-xs border transition-all ${
-                    fontSize === s ? themeStyles.btnActive : themeStyles.btnUnselected
+                    fontSize === s ? themeStyles.btnActive : "bg-slate-950 text-slate-200 border-slate-800 hover:text-white"
                   }`}
                 >
                   {s}
@@ -394,7 +399,7 @@ export function SermonChecklist() {
                   key={t} 
                   onClick={() => handleThemeChange(t)} 
                   className={`px-4 h-8 flex items-center justify-center text-[10px] font-black rounded-md border transition-all uppercase tracking-wide ${
-                    currentTheme === t ? themeStyles.btnActive : themeStyles.btnUnselected
+                    currentTheme === t ? themeStyles.btnActive : "bg-slate-950 text-slate-200 border-slate-800 hover:text-white"
                   }`}
                 >
                   {t === "Dark" ? "Sky Blue" : "Classic Light"}
@@ -511,12 +516,12 @@ export function SermonChecklist() {
           })}
         </Tabs>
 
-        <div className={`mt-12 text-center border-t transition-all duration-500 px-6 py-10 rounded-2xl shadow-inner ${themeStyles.footerBox}`}>
-           <p className={`italic font-serif tracking-wide leading-relaxed ${currentTheme === "Dark" ? "text-slate-900" : "text-slate-600"}`}>
+        <div className={`mt-12 text-center border-t transition-all duration-500 px-6 py-10 rounded-2xl ${themeStyles.footerBox}`}>
+           <p className={`${fontStyles.footerScripture} font-serif tracking-wide leading-relaxed`}>
              &quot;And I have filled him with the Spirit of God, in wisdom, and in understanding, and in knowledge...&quot;
            </p>
-           <p className={`font-black uppercase mt-4 tracking-[0.25em] ${currentTheme === "Dark" ? "text-slate-700" : "text-slate-500"}`}>
-             — Exodus 31:3 <span className="font-sans font-black lowercase opacity-70 ml-1">(Aholiab&apos;s calling)</span>
+           <p className={`${fontStyles.footerRef} font-black uppercase mt-4 tracking-[0.25em]`}>
+             — Exodus 31:3 <span className="font-sans font-black lowercase opacity-80 ml-1">(Aholiab&apos;s calling)</span>
            </p>
         </div>
 
