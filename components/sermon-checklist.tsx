@@ -207,10 +207,6 @@ export function SermonChecklist() {
       tabPhaseText: "text-slate-500 group-data-[state=active]:text-sky-400 font-extrabold",
       tabMainText: "text-slate-300 group-data-[state=active]:text-white",
       
-      // BRAND NEW PROTECTION BACKING FOR LABELS ON SKY BLUE STYLE
-      tabLabelContainerActive: "bg-slate-950/80 border border-slate-800/50 px-2 py-1 rounded-lg shadow-inner w-full block",
-      tabLabelContainerInactive: "w-full block",
-
       tabMetricsBox: "bg-black/40 group-data-[state=active]:bg-sky-950 group-data-[state=active]:text-sky-400 group-data-[state=active]:border-sky-800",
       tabProgressTrack: "bg-black/40",
       tabProgressBar: "bg-gradient-to-r from-purple-500 to-sky-400",
@@ -248,9 +244,6 @@ export function SermonChecklist() {
       tabPhaseText: "text-slate-400 group-data-[state=active]:text-blue-600 font-extrabold",
       tabMainText: "text-slate-600 group-data-[state=active]:text-slate-950",
       
-      tabLabelContainerActive: "w-full block",
-      tabLabelContainerInactive: "w-full block",
-
       tabMetricsBox: "bg-slate-200 group-data-[state=active]:bg-blue-100 group-data-[state=active]:text-blue-700 group-data-[state=active]:border-blue-300",
       tabProgressTrack: "bg-slate-200",
       tabProgressBar: "bg-blue-600",
@@ -440,23 +433,23 @@ export function SermonChecklist() {
                   className={`w-full h-full flex flex-col items-start justify-between p-4 rounded-xl border text-left whitespace-normal break-words transition-all duration-200 group ${themeStyles.tabUnselected} data-[state=active]:${themeStyles.tabActive}`}
                 >
                    <div className="w-full">
-                     <span className={`text-[10px] font-black uppercase tracking-widest block mb-1.5 transition-colors ${themeStyles.tabPhaseText}`}>
-                       {tab.phaseTitle}
+                     {/* WRAPPED CHRONOLOGICAL PHASE TITLES (1) IN HIGH-CONTRAST CAPSULE CAPS HOUSING */}
+                     <span className="inline-block mb-2 group-data-[state=active]:w-auto">
+                       <span className={`text-[10px] font-black uppercase tracking-widest block transition-all ${
+                         currentTheme === "Dark"
+                           ? "group-data-[state=active]:bg-slate-950/90 group-data-[state=active]:border group-data-[state=active]:border-slate-800 group-data-[state=active]:px-2.5 group-data-[state=active]:py-1 group-data-[state=active]:rounded-md group-data-[state=active]:shadow-md group-data-[state=active]:text-sky-400 text-slate-500"
+                           : "text-slate-400 group-data-[state=active]:text-blue-600"
+                       }`}>
+                         {tab.phaseTitle}
+                       </span>
                      </span>
                      
                      <div className="flex items-start gap-2 w-full mb-3">
                         <div className="mt-0.5 shrink-0 opacity-70 group-data-[state=active]:opacity-100">
                           {tab.icon}
                         </div>
-                        {/* WRAPPED MAIN LABELS IN DYNAMIC EMBEDDED BUTTON BACKING HOUSING */}
-                        <span className="w-full block group-data-[state=active]:p-0.5">
-                          <span className={`font-black leading-tight transition-all block ${
-                            currentTheme === "Dark"
-                              ? "group-data-[state=active]:bg-slate-950/80 group-data-[state=active]:border group-data-[state=active]:border-slate-800/80 group-data-[state=active]:px-2 group-data-[state=active]:py-1.5 group-data-[state=active]:rounded-lg group-data-[state=active]:shadow-inner group-data-[state=active]:text-sky-400"
-                              : "group-data-[state=active]:text-slate-950"
-                          } ${themeStyles.tabMainText}`}>
-                            {tab.label}
-                          </span>
+                        <span className={`font-black leading-tight transition-colors ${themeStyles.tabMainText}`}>
+                          {tab.label}
                         </span>
                      </div>
                    </div>
