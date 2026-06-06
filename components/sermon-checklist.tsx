@@ -185,43 +185,44 @@ export function SermonChecklist() {
   const masterProgress = getMasterProgress();
 
   const themeStyles = {
-    // RESTORED DARK GLASS HOUSING + SKY BLUE CIRCLE BACKGROUND
+    // SOFTENED DARK NAVY GLASS HOUSING WITH REDUCED CONTRAST STARKNESS
     Dark: {
       bg: "bg-[#bfdbfe] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#e0f2fe] via-[#bae6fd] to-[#7dd3fc] text-slate-100 selection:bg-sky-500/30",
-      badge: "border-sky-400/30 bg-slate-950/80 text-sky-400 shadow-md backdrop-blur-md",
+      pageTitle: "text-slate-800 drop-shadow-sm", // Explicitly match Classic Light text color
+      badge: "border-sky-500/20 bg-slate-900/60 text-sky-400 shadow-lg backdrop-blur-md",
       badgeDot: "bg-sky-400",
-      headerBlock: "bg-slate-900/90 border-slate-800 text-white shadow-2xl backdrop-blur-md",
+      headerBlock: "bg-slate-900/75 border-slate-800/80 text-white shadow-xl backdrop-blur-md",
       dateLabel: "text-sky-400/80",
-      cardBg: "border-slate-800 bg-slate-900/90 ring-1 ring-white/5 shadow-2xl shadow-black/40 backdrop-blur-md",
-      btnUnselected: "bg-slate-950 text-slate-200 border-slate-800 hover:text-white",
+      cardBg: "border-slate-800/80 bg-slate-900/75 ring-1 ring-white/5 shadow-xl backdrop-blur-md",
+      btnUnselected: "bg-slate-950/80 text-slate-200 border-slate-800 hover:text-white",
       btnActive: "bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-md shadow-purple-900/20",
-      toggleBox: "bg-slate-900/90 border-slate-800 text-sky-100 shadow-2xl backdrop-blur-md",
+      toggleBox: "bg-slate-900/75 border-slate-800/80 text-sky-100 shadow-xl backdrop-blur-md",
       toggleColor: "data-[state=checked]:bg-sky-400",
-      progressBox: "bg-slate-900/90 border-slate-800 shadow-2xl backdrop-blur-md",
+      progressBox: "bg-slate-900/75 border-slate-800/80 shadow-xl backdrop-blur-md",
       progressTitle: "text-sky-400/90",
       progressBar: "from-sky-600 via-blue-500 to-sky-400 shadow-[0_0_20px_rgba(14,165,233,0.3)]",
       
-      tabUnselected: "border-slate-900/60 bg-slate-950/90 text-slate-400 shadow-inner backdrop-blur-md",
-      tabActive: "bg-[#0f1430]/95 border-sky-400 text-white shadow-[0_0_25px_rgba(56,189,248,0.2)] backdrop-blur-md",
+      tabUnselected: "border-slate-800/40 bg-slate-950/70 text-slate-400 shadow-inner backdrop-blur-sm",
+      tabActive: "bg-slate-900/90 border-sky-400 text-white shadow-lg backdrop-blur-md",
       tabPhaseText: "text-slate-500 group-data-[state=active]:text-sky-400 font-extrabold",
       tabMainText: "text-slate-300 group-data-[state=active]:text-white",
       tabMetricsBox: "bg-black/40 group-data-[state=active]:bg-sky-950 group-data-[state=active]:text-sky-400 group-data-[state=active]:border-sky-800",
       tabProgressTrack: "bg-black/40",
       tabProgressBar: "bg-gradient-to-r from-purple-500 to-sky-400",
       
-      workspaceCard: "bg-slate-900/90 border-slate-800/80 shadow-2xl shadow-black/50 backdrop-blur-xl",
-      workspaceHeader: "text-sky-400 border-slate-800/60",
-      taskItem: "bg-slate-950/60 border-slate-900 hover:border-sky-400/50 hover:bg-slate-950/90 hover:shadow-[0_0_15px_rgba(56,189,248,0.05)]",
+      workspaceCard: "bg-slate-900/75 border-slate-800/80 shadow-xl backdrop-blur-xl",
+      workspaceHeader: "text-sky-400 border-slate-800/40",
+      taskItem: "bg-slate-950/50 border-slate-900/80 hover:border-sky-400/50 hover:bg-slate-950/85 hover:shadow-[0_0_15px_rgba(56,189,248,0.05)]",
       taskItemChecked: "bg-sky-400/[0.02] border-transparent opacity-40",
       taskText: "text-white",
       taskDesc: "text-slate-400",
       checkboxBorder: "border-slate-400 group-hover/item:border-sky-400 data-[state=checked]:bg-sky-400 data-[state=checked]:border-sky-400",
-      footerBox: "border-slate-800 bg-slate-900/90 text-slate-300 shadow-2xl backdrop-blur-md",
+      footerBox: "border-slate-800/80 bg-slate-900/75 text-slate-300 shadow-xl backdrop-blur-md",
       footerRef: "text-slate-400"
     },
-    // LIGHT THEME (Completely Untouched)
     Light: {
       bg: "bg-gradient-to-b from-sky-300 via-[#f8fafc] to-[#fae8ff] text-slate-800 selection:bg-blue-200",
+      pageTitle: "text-slate-800 drop-shadow-sm",
       badge: "border-blue-400/40 bg-blue-500/10 text-blue-700 shadow-sm",
       badgeDot: "bg-blue-600",
       headerBlock: "bg-white/90 border-blue-200 text-slate-900 shadow-md backdrop-blur-md",
@@ -327,7 +328,7 @@ export function SermonChecklist() {
         </div>
 
         <div className="space-y-4 text-center">
-          <h1 className={`${fontStyles.pageTitle} font-black tracking-tighter drop-shadow-md transition-colors`}>
+          <h1 className={`${fontStyles.pageTitle} font-black tracking-tighter transition-colors ${currentTheme === "Dark" ? "text-slate-800 drop-shadow-sm" : "text-slate-800 drop-shadow-sm"}`}>
             Aholiab Sermon Workflow
           </h1>
 
@@ -511,11 +512,11 @@ export function SermonChecklist() {
         </Tabs>
 
         <div className={`mt-12 text-center border-t transition-all duration-500 px-6 py-10 rounded-2xl shadow-inner ${themeStyles.footerBox}`}>
-           <p className={`${fontStyles.footerScripture} italic font-serif tracking-wide leading-relaxed`}>
+           <p className={`italic font-serif tracking-wide leading-relaxed ${currentTheme === "Dark" ? "text-slate-900" : "text-slate-600"}`}>
              &quot;And I have filled him with the Spirit of God, in wisdom, and in understanding, and in knowledge...&quot;
            </p>
-           <p className={`${fontStyles.footerRef} font-black uppercase mt-4 tracking-[0.25em] ${themeStyles.footerRef}`}>
-             — Exodus 31:3 <span className="font-sans font-black lowercase opacity-80 ml-1">(Aholiab&apos;s calling)</span>
+           <p className={`font-black uppercase mt-4 tracking-[0.25em] ${currentTheme === "Dark" ? "text-slate-700" : "text-slate-500"}`}>
+             — Exodus 31:3 <span className="font-sans font-black lowercase opacity-70 ml-1">(Aholiab&apos;s calling)</span>
            </p>
         </div>
 
