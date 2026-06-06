@@ -12,16 +12,23 @@ import {
   Calendar,
   Sun,
   BookOpen,
-  CheckCircle2,
   Edit2,
   Globe,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
+
+interface SubTask {
+  id: string;
+  title: string;
+}
 
 interface ChecklistItem {
   id: string;
   title: string;
   description: string;
   isAfterglowRelated?: boolean;
+  subTasks?: SubTask[];
 }
 
 interface WorkflowTab {
@@ -76,12 +83,23 @@ const workflowTabs: WorkflowTab[] = [
     sublabel: "Due ASAP Post-Service",
     icon: <Globe className="h-4 w-4" />,
     items: [
-      { id: "youtube-swap", title: "Site Update", description: "Replace the live stream archive container with the finalized, edited sermon-only YouTube video link (typically 1-2 days post-service)." },
+      { 
+        id: "youtube-swap", 
+        title: "Site Update", 
+        description: "Replace the live stream archive container with the finalized, edited sermon-only YouTube video link (typically 1-2 days post-service).",
+        // YOUR CUSTOM EXPLICIT MILESTONE SUB-TASKS LAID OUT HERE
+        subTasks: [
+          { id: "site-sub-1", title: "Copy the new sermon-only YouTube link, open the sermon site editor page, and click the three dots icon next to the video container." },
+          { id: "site-sub-2", title: "Delete the old livestream link, paste the new sermon link into the space, and click the checkmark icon to save the swap." },
+          { id: "site-sub-3", title: "Click the Publish button at the top of the site creator dashboard to push the updated page live to the public." }
+        ]
+      },
     ],
   },
 ];
 
-const STORAGE_KEY = "aholiab-checklist-state-v16";
+const STORAGE_KEY = "aholiab-checklist-state-v17";
+const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v17";
 const EVANGELISM_KEY = "aholiab-evangelism-toggle";
 const FONT_SIZE_KEY = "aholiab-global-font-size";
 const THEME_KEY = "aholiab-global-theme";
@@ -90,6 +108,9 @@ type AppTheme = "Light" | "Dark";
 
 export function SermonChecklist() {
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
+  const [checkedSubItems, setCheckedSubItems] = useState<Record<string, boolean>>({});
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
+  
   const [isEvangelismSabbath, setIsEvangelismSabbath] = useState(false);
   const [fontSize, setFontSize] = useState<"S" | "M" | "L">("M");
   const [currentTheme, setCurrentTheme] = useState<AppTheme>("Dark");
@@ -99,11 +120,13 @@ export function SermonChecklist() {
 
   useEffect(() => {
     const savedChecked = localStorage.getItem(STORAGE_KEY);
+    const savedSubChecked = localStorage.getItem(SUB_STORAGE_KEY);
     const savedEvangelism = localStorage.getItem(EVANGELISM_KEY);
     const savedFontSize = localStorage.getItem(FONT_SIZE_KEY);
     const savedTheme = localStorage.getItem(THEME_KEY);
 
     if (savedChecked) setCheckedItems(JSON.parse(savedChecked));
+    if (savedSubChecked) setCheckedSubItems(JSON.parse(savedSubChecked));
     if (savedEvangelism) setIsEvangelismSabbath(JSON.parse(savedEvangelism));
     if (savedFontSize === "S" || savedFontSize === "M" || savedFontSize === "L") setFontSize(savedFontSize);
     
@@ -130,6 +153,7 @@ export function SermonChecklist() {
   }, []);
 
   useEffect(() => { if (mounted) localStorage.setItem(STORAGE_KEY, JSON.stringify(checkedItems)); }, [checkedItems, mounted]);
+  useEffect(() => { if (mounted) localStorage.setItem(SUB_STORAGE_KEY, JSON.stringify(checkedSubItems)); }, [checkedSubItems, mounted]);
   useEffect(() => { if (mounted) localStorage.setItem(EVANGELISM_KEY, JSON.stringify(isEvangelismSabbath)); }, [isEvangelismSabbath, mounted]);
 
   const handleFontSizeChange = (size: "S" | "M" | "L") => {
@@ -145,12 +169,44 @@ export function SermonChecklist() {
   const handleReset = () => {
     if (window.confirm("Are you sure you want to reset all tasks?")) {
       setCheckedItems({});
+      setCheckedSubItems({});
+      setExpandedItems({});
       setIsEvangelismSabbath(false);
     }
   };
 
   const handleCheck = (id: string, checked: boolean) => {
     setCheckedItems((prev) => ({ ...prev, [id]: checked }));
+    
+    const item = workflowTabs.flatMap(t => t.items).find(i => i.id === id);
+    if (item?.subTasks) {
+      const subUpdates: Record<string, boolean> = {};
+      item.subTasks.forEach(sub => { subUpdates[sub.id] = checked; });
+      setCheckedSubItems(prev => ({ ...prev, ...subUpdates }));
+    }
+  };
+
+  const handleSubCheck = (parentId: string, subId: string, checked: boolean) => {
+    const updatedSubItems = { ...checkedSubItems, [subId]: checked };
+    setCheckedSubItems(updatedSubItems);
+
+    const item = workflowTabs.flatMap(t => t.items).find(i => i.id === parentId);
+    if (item?.subTasks) {
+      const allChecked = item.subTasks.every(sub => updatedSubItems[sub.id]);
+      setCheckedItems(prev => ({ ...prev, [parentId]: allChecked }));
+    }
+  };
+
+  const toggleAccordion = (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setExpandedItems(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const getSubProgress = (item: ChecklistItem) => {
+    if (!item.subTasks || item.subTasks.length === 0) return { completed: 0, total: 0, percentage: 0 };
+    const completed = item.subTasks.filter(sub => checkedSubItems[sub.id]).length;
+    return { completed, total: item.subTasks.length, percentage: Math.round((completed / item.subTasks.length) * 100) };
   };
 
   const getTabProgress = (tab: WorkflowTab) => {
@@ -433,7 +489,6 @@ export function SermonChecklist() {
                   className={`w-full h-full flex flex-col items-start justify-between p-4 rounded-xl border text-left whitespace-normal break-words transition-all duration-200 group ${themeStyles.tabUnselected} data-[state=active]:${themeStyles.tabActive}`}
                 >
                    <div className="w-full">
-                     {/* WRAPPED CHRONOLOGICAL PHASE TITLES (1) IN HIGH-CONTRAST CAPSULE CAPS HOUSING */}
                      <span className="inline-block mb-2 group-data-[state=active]:w-auto">
                        <span className={`text-[10px] font-black uppercase tracking-widest block transition-all ${
                          currentTheme === "Dark"
@@ -489,33 +544,113 @@ export function SermonChecklist() {
                        <div className="text-[10px] font-black tracking-wider uppercase opacity-80 bg-black/10 px-3 py-1 rounded-full">{progress.percentage}% Phase Progress</div>
                     </div>
 
-                    {visibleItems.map((item) => (
-                      <label 
-                        key={item.id} 
-                        className={`flex items-start gap-4 p-4 rounded-xl border transition-all duration-200 cursor-pointer select-none group/item ${
-                          checkedItems[item.id] 
-                            ? themeStyles.checkboxBorder && themeStyles.taskItemChecked
-                            : themeStyles.taskItem
-                        }`}
-                      >
-                        <div className="pt-0.5 shrink-0">
-                          <Checkbox 
-                            id={item.id} 
-                            checked={checkedItems[item.id] || false} 
-                            onCheckedChange={(c) => handleCheck(item.id, c === true)} 
-                            className={`w-5 h-5 rounded-md border-2 transition-all bg-slate-900 ${themeStyles.checkboxBorder}`} 
-                          />
+                    {visibleItems.map((item) => {
+                      const subProgress = getSubProgress(item);
+                      const hasSubTasks = item.subTasks && item.subTasks.length > 0;
+                      const isExpanded = expandedItems[item.id] || false;
+
+                      return (
+                        <div 
+                          key={item.id}
+                          className={`flex flex-col rounded-xl border overflow-hidden transition-all duration-300 ${
+                            checkedItems[item.id] 
+                              ? themeStyles.taskItemChecked 
+                              : "bg-slate-950/50 border-slate-900/80"
+                          }`}
+                        >
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 group/item">
+                            
+                            <label className="flex items-start gap-4 cursor-pointer select-none w-full sm:max-w-md">
+                              <div className="pt-0.5 shrink-0">
+                                <Checkbox 
+                                  id={item.id} 
+                                  checked={checkedItems[item.id] || false} 
+                                  onCheckedChange={(c) => handleCheck(item.id, c === true)} 
+                                  className={`w-5 h-5 rounded-md border-2 transition-all bg-slate-900 ${themeStyles.checkboxBorder}`} 
+                                />
+                              </div>
+                              <div className="space-y-1 w-full">
+                                 <div className={`${fontStyles.taskTitle} font-black tracking-tight transition-all ${checkedItems[item.id] ? "text-slate-500 line-through opacity-60" : themeStyles.taskText}`}>
+                                   {item.title}
+                                 </div>
+                                 <div className={`${fontStyles.taskDesc} font-medium leading-relaxed ${checkedItems[item.id] ? "text-slate-600 opacity-40" : themeStyles.taskDesc}`}>
+                                   {item.description}
+                                 </div>
+                              </div>
+                            </label>
+
+                            {/* DYNAMIC PROGRESS INJECTION AREA: Hides completely unless 'isExpanded' is checked */}
+                            <div className="flex-1 px-2 sm:px-6 flex items-center gap-3 w-full min-w-[120px]">
+                              {hasSubTasks && isExpanded && (
+                                <>
+                                  <div className="h-1.5 bg-black/40 rounded-full w-full overflow-hidden p-[1px] border border-white/5">
+                                    <div 
+                                      className="h-full rounded-full bg-gradient-to-r from-sky-500 to-indigo-500 transition-all duration-500"
+                                      style={{ width: `${subProgress.percentage}%` }}
+                                    />
+                                  </div>
+                                  <span className="text-[10px] font-mono font-black tracking-tight text-sky-400 shrink-0">
+                                    {subProgress.completed}/{subProgress.total} Steps
+                                  </span>
+                                </>
+                              )}
+                            </div>
+
+                            <div className="shrink-0 flex justify-end">
+                              {hasSubTasks && (
+                                <Button
+                                  variant="ghost"
+                                  onClick={(e) => toggleAccordion(item.id, e)}
+                                  className={`h-8 px-3 rounded-lg border text-[11px] font-black uppercase tracking-wider transition-all ${
+                                    isExpanded 
+                                      ? "bg-sky-500/10 text-sky-400 border-sky-500/30" 
+                                      : "bg-slate-950 text-slate-400 border-slate-800 hover:text-white"
+                                  }`}
+                                >
+                                  {isExpanded ? (
+                                    <>Hide Steps <ChevronUp className="h-3 w-3 ml-1.5 shrink-0" /></>
+                                  ) : (
+                                    <>Show Steps <ChevronDown className="h-3 w-3 ml-1.5 shrink-0" /></>
+                                  )}
+                                </Button>
+                              )}
+                            </div>
+
+                          </div>
+
+                          {hasSubTasks && isExpanded && (
+                            <div className="border-t border-slate-900 bg-black/30 px-6 py-4 space-y-2.5 transition-all animate-in slide-in-from-top-2 duration-300">
+                              <div className="text-[10px] font-black uppercase tracking-[0.15em] text-sky-400/80 mb-1">
+                                Step-by-Step Training Breakdown
+                              </div>
+                              {item.subTasks?.map((sub) => (
+                                <label 
+                                  key={sub.id}
+                                  className={`flex items-start gap-3.5 p-3 rounded-lg border text-xs font-semibold cursor-pointer select-none transition-all ${
+                                    checkedSubItems[sub.id]
+                                      ? "bg-slate-950/20 border-transparent opacity-40 line-through text-slate-500"
+                                      : "bg-slate-950/50 border-slate-900/60 text-slate-200 hover:border-sky-500/30 hover:bg-slate-950/80"
+                                  }`}
+                                >
+                                  <div className="pt-0.5 shrink-0">
+                                    <Checkbox
+                                      id={sub.id}
+                                      checked={checkedSubItems[sub.id] || false}
+                                      onCheckedChange={(c) => handleSubCheck(item.id, sub.id, c === true)}
+                                      className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-500 data-[state=checked]:border-sky-500"
+                                    />
+                                  </div>
+                                  <div className="leading-relaxed">
+                                    {sub.title}
+                                  </div>
+                                </label>
+                              ))}
+                            </div>
+                          )}
+
                         </div>
-                        <div className="space-y-1 w-full">
-                           <div className={`${fontStyles.taskTitle} font-black tracking-tight transition-all ${checkedItems[item.id] ? "text-slate-500 line-through opacity-60" : themeStyles.taskText}`}>
-                             {item.title}
-                           </div>
-                           <div className={`${fontStyles.taskDesc} font-medium leading-relaxed ${checkedItems[item.id] ? "text-slate-600 opacity-40" : themeStyles.taskDesc}`}>
-                             {item.description}
-                           </div>
-                        </div>
-                      </label>
-                    ))}
+                      );
+                    })}
                   </CardContent>
                 </Card>
               </TabsContent>
