@@ -65,7 +65,7 @@ const workflowTabs: WorkflowTab[] = [
     items: [
       { id: "afterglow-study", title: "Afterglow Study Guide", description: "Create the Afterglow study materials and slides.", isAfterglowRelated: true },
       { id: "extended-study", title: "6-Day Extended Study Guide", description: "Create the extended study materials for the week." },
-      { id: "qr-code", title: "QR Codes", description: "Create PDFs, combine them, compress to under 20MB, upload, and generate QR code." },
+      { id: "qr-code", title: "QR Code Update", description: "Create PDFs, combine them, compress to under 20MB, upload, and save QR code update." },
       { id: "website", title: "Sites", description: "Upload the sermon video link, the main slide deck, the study guides, and the combined PDF to the site." },
     ],
   },
@@ -107,12 +107,11 @@ export function SermonChecklist() {
     if (savedEvangelism) setIsEvangelismSabbath(JSON.parse(savedEvangelism));
     if (savedFontSize === "S" || savedFontSize === "M" || savedFontSize === "L") setFontSize(savedFontSize);
     
-    if (savedTheme === "Light" || savedTheme === "Dawn") setCurrentTheme("Light");
-    else if (savedTheme === "Dark" || savedTheme === "Twilight" || savedTheme === "Cyber") setCurrentTheme("Dark");
+    if (savedTheme === "Light") setCurrentTheme("Light");
+    else setCurrentTheme("Dark"); // Serves as our Sky Blue option now
 
-    // STRICT LOCAL TIME ZONE CALCULATION ENGINE
     const today = new Date();
-    const currentDay = today.getDay(); // 0 = Sunday, 6 = Saturday
+    const currentDay = today.getDay();
     const targetSabbath = new Date(today);
 
     if (currentDay === 6) {
@@ -122,8 +121,6 @@ export function SermonChecklist() {
       targetSabbath.setDate(today.getDate() + daysUntilSaturday);
     }
 
-    // Explicitly formatting string manually using local calendar numbers 
-    // to bypass the UTC auto-advance midnight glitch!
     const localYear = targetSabbath.getFullYear();
     const localMonth = String(targetSabbath.getMonth() + 1).padStart(2, "0");
     const localDay = String(targetSabbath.getDate()).padStart(2, "0");
@@ -188,39 +185,41 @@ export function SermonChecklist() {
   const masterProgress = getMasterProgress();
 
   const themeStyles = {
+    // NEW SOFT SKY BLUE RADIAL THEME (Replaced Cosmic Black)
     Dark: {
-      bg: "bg-[#0a0b1e] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-[#0a0b1e] to-black text-slate-100 selection:bg-sky-500/30",
-      badge: "border-sky-400/30 bg-sky-400/5 text-sky-400 shadow-[0_0_15px_rgba(56,189,248,0.1)]",
-      badgeDot: "bg-sky-400",
-      headerBlock: "bg-sky-500/5 border-sky-400/10 text-white shadow-xl shadow-black/20",
-      dateLabel: "text-sky-400/80",
-      cardBg: "border-slate-800/80 bg-slate-900/60 ring-1 ring-white/5 shadow-xl shadow-black/30",
-      btnUnselected: "bg-slate-950 text-slate-200 border-slate-800 hover:text-white",
-      btnActive: "bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-md shadow-purple-900/20",
-      toggleBox: "bg-sky-400/5 border-sky-400/20 text-sky-100 shadow-xl shadow-black/20",
-      toggleColor: "data-[state=checked]:bg-sky-400",
-      progressBox: "bg-sky-400/5 border-sky-400/20 shadow-xl shadow-black/20",
-      progressTitle: "text-sky-400/90",
-      progressBar: "from-sky-600 via-blue-500 to-sky-400 shadow-[0_0_20px_rgba(14,165,233,0.3)]",
+      bg: "bg-[#bfdbfe] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#e0f2fe] via-[#bae6fd] to-[#7dd3fc] text-slate-900 selection:bg-sky-200",
+      badge: "border-sky-500/40 bg-sky-500/10 text-sky-800 shadow-sm",
+      badgeDot: "bg-sky-600",
+      headerBlock: "bg-white/90 border-sky-200 text-slate-900 shadow-md backdrop-blur-md",
+      dateLabel: "text-sky-600/80",
+      cardBg: "border-sky-200 bg-white/90 ring-1 ring-white/20 shadow-lg shadow-sky-900/10 backdrop-blur-md",
+      btnUnselected: "bg-sky-50 text-sky-900 border-sky-200 hover:bg-sky-100 font-bold",
+      btnActive: "bg-sky-600 text-white shadow-md shadow-sky-900/20",
+      toggleBox: "bg-white border-sky-200 text-slate-900 shadow-md",
+      toggleColor: "data-[state=checked]:bg-sky-600",
+      progressBox: "bg-white border-sky-200 shadow-md",
+      progressTitle: "text-sky-700",
+      progressBar: "from-sky-500 via-blue-500 to-indigo-500 shadow-none",
       
-      tabUnselected: "border-slate-900 bg-slate-950/60 text-slate-400 shadow-inner",
-      tabActive: "bg-[#0f1430] border-sky-400 text-white shadow-[0_0_25px_rgba(56,189,248,0.2)]",
-      tabPhaseText: "text-slate-500 group-data-[state=active]:text-sky-400 font-extrabold",
-      tabMainText: "text-slate-300 group-data-[state=active]:text-white",
-      tabMetricsBox: "bg-black/40 group-data-[state=active]:bg-sky-950 group-data-[state=active]:text-sky-400 group-data-[state=active]:border-sky-800",
-      tabProgressTrack: "bg-black/40",
-      tabProgressBar: "bg-gradient-to-r from-purple-500 to-sky-400",
+      tabUnselected: "border-sky-100 bg-sky-50/60 text-slate-500 hover:bg-sky-50",
+      tabActive: "bg-white border-sky-500 text-slate-950 shadow-md",
+      tabPhaseText: "text-slate-400 group-data-[state=active]:text-sky-600 font-extrabold",
+      tabMainText: "text-slate-600 group-data-[state=active]:text-slate-950",
+      tabMetricsBox: "bg-sky-100 group-data-[state=active]:bg-sky-100 group-data-[state=active]:text-sky-700 group-data-[state=active]:border-sky-300",
+      tabProgressTrack: "bg-sky-100",
+      tabProgressBar: "bg-sky-500",
       
-      workspaceCard: "bg-sky-950/10 border-sky-400/20 shadow-black/50",
-      workspaceHeader: "text-sky-400 border-sky-400/10",
-      taskItem: "bg-slate-950/40 border-slate-900 hover:border-sky-400/50 hover:bg-slate-950/80 hover:shadow-[0_0_15px_rgba(56,189,248,0.05)]",
-      taskItemChecked: "bg-sky-400/[0.02] border-transparent opacity-40",
-      taskText: "text-white",
-      taskDesc: "text-slate-400",
-      checkboxBorder: "border-slate-400 group-hover/item:border-sky-400 data-[state=checked]:bg-sky-400 data-[state=checked]:border-sky-400",
-      footerBox: "border-slate-900/60 text-slate-300 bg-white/[0.02]",
-      footerRef: "text-slate-400"
+      workspaceCard: "bg-white border-sky-200 shadow-xl",
+      workspaceHeader: "text-sky-700 border-sky-100",
+      taskItem: "bg-white border-sky-100 hover:border-sky-400 hover:bg-sky-50/[0.3] hover:shadow-sm",
+      taskItemChecked: "bg-slate-100/80 border-transparent opacity-50",
+      taskText: "text-slate-800",
+      taskDesc: "text-slate-500",
+      checkboxBorder: "border-slate-400 group-hover/item:border-sky-500 data-[state=checked]:bg-sky-600 data-[state=checked]:border-sky-600",
+      footerBox: "border-sky-200/60 text-sky-900 bg-white/70 shadow-sm",
+      footerRef: "text-sky-700"
     },
+    // LIGHT THEME (Unchanged layout - classic light blues & soft lilac)
     Light: {
       bg: "bg-gradient-to-b from-sky-300 via-[#f8fafc] to-[#fae8ff] text-slate-800 selection:bg-blue-200",
       badge: "border-blue-400/40 bg-blue-500/10 text-blue-700 shadow-sm",
@@ -318,13 +317,6 @@ export function SermonChecklist() {
   return (
     <div className={`min-h-screen transition-all duration-500 overflow-x-hidden ${themeStyles.bg} ${fontStyles.S}`}>
       
-      {currentTheme === "Dark" && (
-        <>
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/10 blur-[120px] pointer-events-none" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-600/10 blur-[120px] pointer-events-none" />
-        </>
-      )}
-
       <div className="max-w-4xl mx-auto px-4 py-12 relative z-10 space-y-5">
         
         <div className="text-center">
@@ -335,7 +327,7 @@ export function SermonChecklist() {
         </div>
 
         <div className="space-y-4 text-center">
-          <h1 className={`${fontStyles.pageTitle} font-black tracking-tighter drop-shadow-2xl transition-colors`}>
+          <h1 className={`${fontStyles.pageTitle} font-black tracking-tighter drop-shadow-md transition-colors`}>
             Aholiab Sermon Workflow
           </h1>
 
@@ -353,7 +345,7 @@ export function SermonChecklist() {
                 value={targetDate} 
                 onChange={(e) => setTargetDate(e.target.value)}
                 onBlur={() => setIsEditingDate(false)}
-                className="bg-slate-900 border-2 border-sky-400 rounded-xl px-4 py-1.5 text-white text-xl focus:outline-none"
+                className="bg-slate-100 border-2 border-sky-400 rounded-xl px-4 py-1.5 text-slate-900 text-xl focus:outline-none"
                 autoFocus
               />
             ) : (
@@ -378,7 +370,7 @@ export function SermonChecklist() {
         <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-2xl border backdrop-blur-xl transition-all duration-300 ${themeStyles.cardBg}`}>
           <div className="flex items-center justify-between md:justify-start gap-3 w-full">
             <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 mr-2">Font Scale:</span>
-            <div className="flex gap-1.5 bg-black/20 p-1 rounded-lg border border-white/5">
+            <div className="flex gap-1.5 bg-black/5 p-1 rounded-lg border border-slate-200">
               {["S", "M", "L"].map((s) => (
                 <button 
                   key={s} 
@@ -393,9 +385,9 @@ export function SermonChecklist() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between md:justify-end gap-3 w-full border-t md:border-t-0 md:border-l border-white/5 pt-3 md:pt-0 md:pl-4">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 mr-2">Console Theme:</span>
-            <div className="flex gap-1.5 bg-black/20 p-1 rounded-lg border border-white/5">
+          <div className="flex items-center justify-between md:justify-end gap-3 w-full border-t md:border-t-0 md:border-l border-slate-200 pt-3 md:pt-0 md:pl-4">
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 mr-2">Console Style:</span>
+            <div className="flex gap-1.5 bg-black/5 p-1 rounded-lg border border-slate-200">
               {(["Light", "Dark"] as const).map((t) => (
                 <button 
                   key={t} 
@@ -404,7 +396,7 @@ export function SermonChecklist() {
                     currentTheme === t ? themeStyles.btnActive : themeStyles.btnUnselected
                   }`}
                 >
-                  {t}
+                  {t === "Dark" ? "Sky Blue" : "Classic Light"}
                 </button>
               ))}
             </div>
@@ -419,7 +411,7 @@ export function SermonChecklist() {
               <span className={`${fontStyles.progressCounts} opacity-60 font-medium`}>({masterProgress.completed}/{masterProgress.total} Tasks)</span>
             </div>
           </div>
-          <div className="h-3 bg-black/30 rounded-full p-0.5 border border-white/5">
+          <div className="h-3 bg-black/5 rounded-full p-0.5 border border-slate-200">
             <div className={`h-full rounded-full bg-gradient-to-r transition-all duration-1000 ${themeStyles.progressBar}`} style={{ width: `${masterProgress.percentage}%` }} />
           </div>
         </div>
@@ -450,7 +442,7 @@ export function SermonChecklist() {
                    </div>
 
                    <div className="w-full mt-auto">
-                     <div className="w-full pt-2.5 border-t border-black/5 dark:border-white/5 flex items-center justify-between font-bold text-[11px] transition-colors">
+                     <div className="w-full pt-2.5 border-t border-black/5 dark:border-slate-100 flex items-center justify-between font-bold text-[11px] transition-colors">
                         <span className={`${fontStyles.tabSub} opacity-70`}>
                           {tab.sublabel} {tab.id === "backdrops-theme" && getWednesdayDateString()}
                         </span>
@@ -476,12 +468,12 @@ export function SermonChecklist() {
             return (
               <TabsContent key={tab.id} value={tab.id} className="focus:outline-none">
                 
-                <Card className={`backdrop-blur-2xl border rounded-2xl overflow-hidden transition-all duration-500 shadow-2xl ${themeStyles.workspaceCard}`}>
+                <Card className={`backdrop-blur-2xl border rounded-2xl overflow-hidden transition-all duration-500 shadow-xl ${themeStyles.workspaceCard}`}>
                   <CardContent className="p-4 md:p-6 space-y-3">
                     
                     <div className={`flex items-center justify-between mb-1 border-b pb-3 ${themeStyles.workspaceHeader}`}>
                        <h3 className={`${fontStyles.cardHeader} font-black uppercase tracking-widest`}>{tab.label} Checklist</h3>
-                       <div className="text-[10px] font-black tracking-wider uppercase opacity-80 bg-black/10 px-3 py-1 rounded-full">{progress.percentage}% Phase Progress</div>
+                       <div className="text-[10px] font-black tracking-wider uppercase opacity-80 bg-black/5 px-3 py-1 rounded-full">{progress.percentage}% Phase Progress</div>
                     </div>
 
                     {visibleItems.map((item) => (
@@ -498,14 +490,14 @@ export function SermonChecklist() {
                             id={item.id} 
                             checked={checkedItems[item.id] || false} 
                             onCheckedChange={(c) => handleCheck(item.id, c === true)} 
-                            className={`w-5 h-5 rounded-md border-2 transition-all bg-slate-900 ${themeStyles.checkboxBorder}`} 
+                            className={`w-5 h-5 rounded-md border-2 transition-all bg-white ${themeStyles.checkboxBorder}`} 
                           />
                         </div>
                         <div className="space-y-1 w-full">
-                           <div className={`${fontStyles.taskTitle} font-black tracking-tight transition-all ${checkedItems[item.id] ? "text-slate-500 line-through opacity-60" : themeStyles.taskText}`}>
+                           <div className={`${fontStyles.taskTitle} font-black tracking-tight transition-all ${checkedItems[item.id] ? "text-slate-400 line-through opacity-50" : themeStyles.taskText}`}>
                              {item.title}
                            </div>
-                           <div className={`${fontStyles.taskDesc} font-medium leading-relaxed ${checkedItems[item.id] ? "text-slate-600 opacity-40" : themeStyles.taskDesc}`}>
+                           <div className={`${fontStyles.taskDesc} font-medium leading-relaxed ${checkedItems[item.id] ? "text-slate-400 opacity-40" : themeStyles.taskDesc}`}>
                              {item.description}
                            </div>
                         </div>
@@ -518,12 +510,12 @@ export function SermonChecklist() {
           })}
         </Tabs>
 
-        <div className={`mt-12 text-center border-t transition-all duration-500 px-6 py-10 rounded-2xl shadow-inner ${themeStyles.footerBox}`}>
+        <div className={`mt-12 text-center border-t transition-all duration-500 px-6 py-10 rounded-2xl shadow-sm ${themeStyles.footerBox}`}>
            <p className={`${fontStyles.footerScripture} italic font-serif tracking-wide leading-relaxed`}>
              &quot;And I have filled him with the Spirit of God, in wisdom, and in understanding, and in knowledge...&quot;
            </p>
            <p className={`${fontStyles.footerRef} font-black uppercase mt-4 tracking-[0.25em] ${themeStyles.footerRef}`}>
-             — Exodus 31:3 <span className="font-sans font-black lowercase opacity-80 ml-1">(Aholiab&apos;s calling)</span>
+             — Exodus 31:3 <span className="font-sans font-black lowercase opacity-70 ml-1">(Aholiab&apos;s calling)</span>
            </p>
         </div>
 
