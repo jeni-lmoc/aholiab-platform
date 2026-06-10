@@ -87,11 +87,12 @@ const workflowTabs: WorkflowTab[] = [
         id: "youtube-swap", 
         title: "Site Update", 
         description: "Replace the live stream archive container with the finalized, edited sermon-only YouTube video link (typically 1-2 days post-service).",
-        // YOUR CUSTOM EXPLICIT MILESTONE SUB-TASKS LAID OUT HERE
+        // PERFECTLY TUNED JARGON SUB-TASKS BOUND HERE
         subTasks: [
           { id: "site-sub-1", title: "Copy the new sermon-only YouTube link, open the sermon site editor page, and click the three dots icon next to the video container." },
           { id: "site-sub-2", title: "Delete the old livestream link, paste the new sermon link into the space, and click the checkmark icon to save the swap." },
-          { id: "site-sub-3", title: "Click the Publish button at the top of the site creator dashboard to push the updated page live to the public." }
+          { id: "site-sub-3", title: "Click the Publish button in the upper right corner to push the updated page live." },
+          { id: "site-sub-4", title: "Open the live public sermon site and verify that the correct sermon-only video plays flawlessly." }
         ]
       },
     ],
@@ -233,9 +234,11 @@ export function SermonChecklist() {
     return `(${wed.getMonth() + 1}/${wed.getDate()})`;
   };
 
+  // REVERENT DATE FORMATTER: Swaps 'Saturday' for 'Sabbath'
   const formatDisplayDate = (dateStr: string) => {
     if (!dateStr) return "";
-    return new Date(dateStr + "T00:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+    const originalFormatted = new Date(dateStr + "T00:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+    return originalFormatted.replace("Saturday", "Sabbath");
   };
 
   const masterProgress = getMasterProgress();
@@ -579,7 +582,6 @@ export function SermonChecklist() {
                               </div>
                             </label>
 
-                            {/* DYNAMIC PROGRESS INJECTION AREA: Hides completely unless 'isExpanded' is checked */}
                             <div className="flex-1 px-2 sm:px-6 flex items-center gap-3 w-full min-w-[120px]">
                               {hasSubTasks && isExpanded && (
                                 <>
