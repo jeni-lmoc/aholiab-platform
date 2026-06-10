@@ -16,11 +16,80 @@ import {
   Globe,
   ChevronDown,
   ChevronUp,
+  ExternalLink,
+  Copy,
+  Check,
 } from "lucide-react";
 
+// ==========================================
+// CENTRAL ASSETS & SOURCE OF TRUTH MANAGER
+// ==========================================
+const GLOBAL_LINKS = {
+  trainingManual: "https://docs.google.com/document/d/1_Bt7oG56msLcRYvy2UqFG4DY8FkXiRbnLQuKi6SQb2U/edit?usp=drive_link",
+  managingSlideLimits: "https://docs.google.com/document/d/1_Bt7oG56msLcRYvy2UqFG4DY8FkXiRbnLQuKi6SQb2U/edit?tab=t.ymklsy324605",
+  weeklySermonTracker: "https://lmoc.slack.com/lists/T09C5S0VDK8/F0AT40A4ZDE"
+};
+
+const MASTER_AI_PROMPT = `Clean and format the attached document into text format for input into Gamma.
+
+Rules:
+Extract every Bible verse, quotation, or referenced material in the exact order it appears.
+This includes Scripture, books, articles, manuscripts, or any quoted paragraph.
+Each distinct reference or quote becomes one text block .
+Combine multi-verse Scripture passages into a single block.
+Keep non-Bible quotes grouped exactly as they appear (do not split them unless clearly separated in the document).
+Do not summarize, rephrase, or omit any text.
+Do not add any extra commentary or words.
+
+Formatting:
+Start with the first text block as Slide 1:
+ Slide 1 - Title: Sermon Title Body: Pastor Ivor Myers
+Then continue numbering text blocks sequentially.
+Use this exact format for every text block:
+ Slide # - Title: [Reference or Source] Body: [Full text]
+
+Title rules:
+For Bible verses, use the full book name and verse reference.
+For non-Bible material, use the most specific source available (book name, author, manuscript reference, etc.).
+If no clear source is given or the source cannot be determined, begin the title with: DOUBLE CHECK – followed by a short descriptive label.
+For images, use  Slide # - Title: Image Placeholder Body: Check original document for image
+
+Additional rules:
+Keep duplicate references only if they are separated in the document.
+If duplicate references appear back-to-back, remove the duplicate.
+Preserve the exact order of all content.
+
+Quotation rules:
+Remove unnecessary outer quotation marks that come from document formatting.
+Preserve quotation marks that are part of the actual quoted material (especially non-Bible sources like Ellen G. White).
+Do not add new quotation marks anywhere.
+
+Output:
+Plain text only
+One text block per line
+No bullet points
+No extra formatting or commentary
+Do NOT create a slide deck`;
+
+const ADDITIONAL_INSTRUCTIONS_PROMPT = `DO NOT Summarize, rephrase, or add sub-titles. DO NOT omit any input text or make up new content. All card titles must use heading level 1 (H1), be center-aligned, use the same theme color consistently, and remain consistent across all slides. All body text must use large text size, be center-aligned and remain consistent across all slides. DO NOT use Arrows, Stats, Circle stats, Pyramid, Funnel, Cycle, Circle, Ring, Semi-circle, and Flower to illustrate card content. Sparingly use Images or icons with text, Timeline, Bullets, Bar stats, Steps, and Staircase. No additional comments. Just the verse or the quote on each page. Nothing extra, just the text as provided.`;
+
+
+// ==========================================
+// TYPE DEFINITIONS & DATA ARCHITECTURE
+// ==========================================
 interface SubTask {
   id: string;
   title: string;
+  customButton?: {
+    label: string;
+    actionType: "copy" | "link";
+    payload: string;
+  };
+}
+
+interface ProgressivePhase {
+  phaseName: string;
+  subTasks: SubTask[];
 }
 
 interface ChecklistItem {
@@ -28,7 +97,10 @@ interface ChecklistItem {
   title: string;
   description: string;
   isAfterglowRelated?: boolean;
-  subTasks?: SubTask[];
+  hasManualLink?: boolean;
+  // ENHANCED MATRIX: Now supports progressive disclosures or simple flat sub-tasks
+  progressivePhases?: ProgressivePhase[];
+  subTasks?: SubTask[]; 
 }
 
 interface WorkflowTab {
@@ -59,7 +131,59 @@ const workflowTabs: WorkflowTab[] = [
     sublabel: "Due Pre-Sabbath School",
     icon: <Sun className="h-4 w-4" />,
     items: [
-      { id: "verse-tech", title: "Verse Tech", description: "Clean up the Pastor's raw outline and turn it into a raw slide presentation." },
+      { 
+        id: "verse-tech", 
+        title: "Verse Tech", 
+        description: "Process raw outlines, generate AI text formatting, build the raw slide decks within Gamma, and set global styles.",
+        hasManualLink: true,
+        // PREMIUM PROGRESSIVE DISCLOSURE ARCHITECTURE FOR VERSE TECH
+        progressivePhases: [
+          {
+            phaseName: "Phase 1: Intake & AI Prep",
+            subTasks: [
+              { id: "vt-p1-s1", title: "Locate the most recent sermon Word document in the Aholiab channel and download it to your machine." },
+              { id: "vt-p1-s2", title: "Open Gemini (ensure you are on the church Graphics account) and drag-and-drop the downloaded document into the chat box." },
+              { 
+                id: "vt-p1-s3", 
+                title: "Run the Master AI Prompt inside the Gemini container alongside your uploaded document.",
+                customButton: { label: "Copy Master AI Prompt", actionType: "copy", payload: MASTER_AI_PROMPT }
+              },
+              { id: "vt-p1-s4", title: "Perform a quick accuracy scan of the generated plain-text output, then copy the clean text layout to your clipboard." }
+            ]
+          },
+          {
+            phaseName: "Phase 2: Gamma Slide Generation",
+            subTasks: [
+              { 
+                id: "vt-p2-s1", 
+                title: "In Gamma, click + Create New AI -> Paste in Text, paste your content, and set parameters to Presentation, Traditional (16:9), and 'Preserve this exact text'.",
+                customButton: { label: "Managing Slide Limits Guide", actionType: "link", payload: GLOBAL_LINKS.managingSlideLimits }
+              },
+              { 
+                id: "vt-p2-s2", 
+                title: "Click Continue, switch layout to Freeform with 'Don't Add Images', and paste our enforcement block into the Additional Instructions box on the right.",
+                customButton: { label: "Copy Additional Instructions", actionType: "copy", payload: ADDITIONAL_INSTRUCTIONS_PROMPT }
+              },
+              { id: "vt-p2-s3", title: "Click Generate. Once complete, run a swift visual scroll to confirm no rogue decorative shapes or graphic items leaked into the layout." },
+              { id: "vt-p2-s4", title: "Open Custom Themes via the palette directory icon and apply the look matching the Sabbath Date or Sermon Title (Fallback: LMOC Brand)." }
+            ]
+          },
+          {
+            phaseName: "Phase 3: Finalizing & Hand-off",
+            subTasks: [
+              { id: "vt-p3-s1", title: "Navigate to Page setup... inside Gamma, change Base font size to L (Large), turn ON Card backdrops, add the Small Theme logo, and choose 'Hide on first card'." },
+              { id: "vt-p3-s2", title: "Open the template directory, copy the second card from the Social Media Card deck, and paste it at the very end of your active sermon deck filmstrip." },
+              { id: "vt-p3-s3", title: "Click 'Add a Card using AI' at the bottom of the filmstrip and paste the References Index prompt from the training manual to build your canon summary slide." },
+              { id: "vt-p3-s4", title: "Click Share, set public parameters strictly to 'View' to lock all visual assets, and copy your secure view-only deck link." },
+              { 
+                id: "vt-p3-s5", 
+                title: "Open the Weekly Sermon Tracker in Slack, set status to Draft, paste the Gamma URL, upload the backup files, and send a direct hand-off notification DM to your POC.",
+                customButton: { label: "Open Weekly Sermon Tracker", actionType: "link", payload: GLOBAL_LINKS.weeklySermonTracker }
+              }
+            ]
+          }
+        ]
+      },
       { id: "beautify", title: "Beautification", description: "Format and beautify the raw slides so they are finalized for the Pastor's review." },
     ],
   },
@@ -87,7 +211,6 @@ const workflowTabs: WorkflowTab[] = [
         id: "youtube-swap", 
         title: "Site Update", 
         description: "Replace the live stream archive container with the finalized, edited sermon-only YouTube video link (typically 1-2 days post-service).",
-        // PERFECTLY TUNED JARGON SUB-TASKS BOUND HERE
         subTasks: [
           { id: "site-sub-1", title: "Copy the new sermon-only YouTube link, open the sermon site editor page, and click the three dots icon next to the video container." },
           { id: "site-sub-2", title: "Delete the old livestream link, paste the new sermon link into the space, and click the checkmark icon to save the swap." },
@@ -99,8 +222,8 @@ const workflowTabs: WorkflowTab[] = [
   },
 ];
 
-const STORAGE_KEY = "aholiab-checklist-state-v17";
-const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v17";
+const STORAGE_KEY = "aholiab-checklist-state-v18";
+const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v18";
 const EVANGELISM_KEY = "aholiab-evangelism-toggle";
 const FONT_SIZE_KEY = "aholiab-global-font-size";
 const THEME_KEY = "aholiab-global-theme";
@@ -111,6 +234,7 @@ export function SermonChecklist() {
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
   const [checkedSubItems, setCheckedSubItems] = useState<Record<string, boolean>>({});
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
+  const [copiedStatus, setCopiedStatus] = useState<Record<string, boolean>>({});
   
   const [isEvangelismSabbath, setIsEvangelismSabbath] = useState(false);
   const [fontSize, setFontSize] = useState<"S" | "M" | "L">("M");
@@ -180,11 +304,15 @@ export function SermonChecklist() {
     setCheckedItems((prev) => ({ ...prev, [id]: checked }));
     
     const item = workflowTabs.flatMap(t => t.items).find(i => i.id === id);
-    if (item?.subTasks) {
-      const subUpdates: Record<string, boolean> = {};
+    if (!item) return;
+
+    const subUpdates: Record<string, boolean> = {};
+    if (item.progressivePhases) {
+      item.progressivePhases.flatMap(p => p.subTasks).forEach(sub => { subUpdates[sub.id] = checked; });
+    } else if (item.subTasks) {
       item.subTasks.forEach(sub => { subUpdates[sub.id] = checked; });
-      setCheckedSubItems(prev => ({ ...prev, ...subUpdates }));
     }
+    setCheckedSubItems(prev => ({ ...prev, ...subUpdates }));
   };
 
   const handleSubCheck = (parentId: string, subId: string, checked: boolean) => {
@@ -192,8 +320,14 @@ export function SermonChecklist() {
     setCheckedSubItems(updatedSubItems);
 
     const item = workflowTabs.flatMap(t => t.items).find(i => i.id === parentId);
-    if (item?.subTasks) {
-      const allChecked = item.subTasks.every(sub => updatedSubItems[sub.id]);
+    if (!item) return;
+
+    const allSubTasks = item.progressivePhases 
+      ? item.progressivePhases.flatMap(p => p.subTasks) 
+      : (item.subTasks || []);
+
+    if (allSubTasks.length > 0) {
+      const allChecked = allSubTasks.every(sub => updatedSubItems[sub.id]);
       setCheckedItems(prev => ({ ...prev, [parentId]: allChecked }));
     }
   };
@@ -204,10 +338,26 @@ export function SermonChecklist() {
     setExpandedItems(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const handleActionClick = (buttonSpec: any, subTaskId: string) => {
+    if (buttonSpec.actionType === "link") {
+      window.open(buttonSpec.payload, "_blank", "noopener,noreferrer");
+    } else if (buttonSpec.actionType === "copy") {
+      navigator.clipboard.writeText(buttonSpec.payload);
+      setCopiedStatus(prev => ({ ...prev, [subTaskId]: true }));
+      setTimeout(() => {
+        setCopiedStatus(prev => ({ ...prev, [subTaskId]: false }));
+      }, 2000);
+    }
+  };
+
   const getSubProgress = (item: ChecklistItem) => {
-    if (!item.subTasks || item.subTasks.length === 0) return { completed: 0, total: 0, percentage: 0 };
-    const completed = item.subTasks.filter(sub => checkedSubItems[sub.id]).length;
-    return { completed, total: item.subTasks.length, percentage: Math.round((completed / item.subTasks.length) * 100) };
+    const allSubTasks = item.progressivePhases 
+      ? item.progressivePhases.flatMap(p => p.subTasks) 
+      : (item.subTasks || []);
+
+    if (allSubTasks.length === 0) return { completed: 0, total: 0, percentage: 0 };
+    const completed = allSubTasks.filter(sub => checkedSubItems[sub.id]).length;
+    return { completed, total: allSubTasks.length, percentage: Math.round((completed / allSubTasks.length) * 100) };
   };
 
   const getTabProgress = (tab: WorkflowTab) => {
@@ -234,7 +384,6 @@ export function SermonChecklist() {
     return `(${wed.getMonth() + 1}/${wed.getDate()})`;
   };
 
-  // REVERENT DATE FORMATTER: Swaps 'Saturday' for 'Sabbath'
   const formatDisplayDate = (dateStr: string) => {
     if (!dateStr) return "";
     const originalFormatted = new Date(dateStr + "T00:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
@@ -549,7 +698,7 @@ export function SermonChecklist() {
 
                     {visibleItems.map((item) => {
                       const subProgress = getSubProgress(item);
-                      const hasSubTasks = item.subTasks && item.subTasks.length > 0;
+                      const hasSubTasks = (item.subTasks && item.subTasks.length > 0) || (item.progressivePhases && item.progressivePhases.length > 0);
                       const isExpanded = expandedItems[item.id] || false;
 
                       return (
@@ -582,6 +731,7 @@ export function SermonChecklist() {
                               </div>
                             </label>
 
+                            {/* DYNAMIC SUB-PHASE PROGRESS INJECTION AREA */}
                             <div className="flex-1 px-2 sm:px-6 flex items-center gap-3 w-full min-w-[120px]">
                               {hasSubTasks && isExpanded && (
                                 <>
@@ -620,33 +770,115 @@ export function SermonChecklist() {
 
                           </div>
 
+                          {/* EXPANDABLE WORKSPACE CONSOLE */}
                           {hasSubTasks && isExpanded && (
-                            <div className="border-t border-slate-900 bg-black/30 px-6 py-4 space-y-2.5 transition-all animate-in slide-in-from-top-2 duration-300">
-                              <div className="text-[10px] font-black uppercase tracking-[0.15em] text-sky-400/80 mb-1">
-                                Step-by-Step Training Breakdown
-                              </div>
-                              {item.subTasks?.map((sub) => (
-                                <label 
-                                  key={sub.id}
-                                  className={`flex items-start gap-3.5 p-3 rounded-lg border text-xs font-semibold cursor-pointer select-none transition-all ${
-                                    checkedSubItems[sub.id]
-                                      ? "bg-slate-950/20 border-transparent opacity-40 line-through text-slate-500"
-                                      : "bg-slate-950/50 border-slate-900/60 text-slate-200 hover:border-sky-500/30 hover:bg-slate-950/80"
-                                  }`}
-                                >
-                                  <div className="pt-0.5 shrink-0">
-                                    <Checkbox
-                                      id={sub.id}
-                                      checked={checkedSubItems[sub.id] || false}
-                                      onCheckedChange={(c) => handleSubCheck(item.id, sub.id, c === true)}
-                                      className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-500 data-[state=checked]:border-sky-500"
-                                    />
+                            <div className="border-t border-slate-900 bg-black/30 px-4 md:px-6 py-4 space-y-5 transition-all animate-in slide-in-from-top-2 duration-300">
+                              
+                              {/* EXTERNAL TRAINING MANUAL LINK COMPONENT ANCHOR */}
+                              {item.hasManualLink && (
+                                <div className="flex justify-end pb-1 border-b border-slate-900">
+                                  <Button
+                                    variant="link"
+                                    onClick={() => window.open(GLOBAL_LINKS.trainingManual, "_blank", "noopener,noreferrer")}
+                                    className="h-auto p-0 text-[10px] font-black tracking-widest uppercase text-sky-400/80 hover:text-sky-300 flex items-center gap-1.5"
+                                  >
+                                    <ExternalLink className="h-3 w-3" /> Open Full Verse Tech Manual
+                                  </Button>
+                                </div>
+                              )}
+
+                              {/* CONDITIONAL RENDER ENGINE: PROGRESSIVE PHASES OR STANDARD STRIPS */}
+                              {item.progressivePhases ? (
+                                item.progressivePhases.map((phase, pIdx) => (
+                                  <div key={pIdx} className="space-y-2">
+                                    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-sky-400 border-l-2 border-sky-500 pl-2 mb-2.5">
+                                      {phase.phaseName}
+                                    </div>
+                                    {phase.subTasks.map((sub) => (
+                                      <div 
+                                        key={sub.id} 
+                                        className={`flex flex-col p-3 rounded-lg border transition-all ${
+                                          checkedSubItems[sub.id]
+                                            ? "bg-slate-950/20 border-transparent opacity-45"
+                                            : "bg-slate-950/50 border-slate-900/60 hover:border-sky-500/20 hover:bg-slate-950/80"
+                                        }`}
+                                      >
+                                        <label className={`flex items-start gap-3.5 text-xs font-semibold cursor-pointer select-none ${checkedSubItems[sub.id] ? "line-through text-slate-500" : "text-slate-200"}`}>
+                                          <div className="pt-0.5 shrink-0">
+                                            <Checkbox
+                                              id={sub.id}
+                                              checked={checkedSubItems[sub.id] || false}
+                                              onCheckedChange={(c) => handleSubCheck(item.id, sub.id, c === true)}
+                                              className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-500 data-[state=checked]:border-sky-500"
+                                            />
+                                          </div>
+                                          <div className="leading-relaxed flex-1">
+                                            {sub.title}
+                                          </div>
+                                        </label>
+
+                                        {/* INLINE ACTIONS BLOCK (COPY/LINK MODALS) */}
+                                        {sub.customButton && (
+                                          <div className="pl-7.5 mt-2.5">
+                                            <Button
+                                              variant="outline"
+                                              size="sm"
+                                              onClick={() => handleActionClick(sub.customButton, sub.id)}
+                                              className={`h-7 px-2.5 rounded text-[10px] font-black uppercase tracking-wider transition-all ${
+                                                sub.customButton.actionType === "copy"
+                                                  ? copiedStatus[sub.id]
+                                                    ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
+                                                    : "bg-slate-900 border-slate-800 text-sky-400/90 hover:text-white hover:bg-slate-800"
+                                                  : "bg-slate-900 border-slate-800 text-purple-400 hover:text-white hover:bg-slate-800"
+                                              }`}
+                                            >
+                                              {sub.customButton.actionType === "copy" ? (
+                                                copiedStatus[sub.id] ? (
+                                                  <><Check className="h-3 w-3 mr-1.5 shrink-0" /> Copied!</>
+                                                ) : (
+                                                  <><Copy className="h-3 w-3 mr-1.5 shrink-0" /> {sub.customButton.label}</>
+                                                )
+                                              ) : (
+                                                <><ExternalLink className="h-3 w-3 mr-1.5 shrink-0" /> {sub.customButton.label}</>
+                                              )}
+                                            </Button>
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
                                   </div>
-                                  <div className="leading-relaxed">
-                                    {sub.title}
+                                ))
+                              ) : (
+                                // FALLBACK: CLEAN STANDARD FLAT TASKS LAYOUT
+                                <div className="space-y-2.5">
+                                  <div className="text-[10px] font-black uppercase tracking-[0.15em] text-sky-400/80 mb-1">
+                                    Step-by-Step Training Breakdown
                                   </div>
-                                </label>
-                              ))}
+                                  {item.subTasks?.map((sub) => (
+                                    <label 
+                                      key={sub.id}
+                                      className={`flex items-start gap-3.5 p-3 rounded-lg border text-xs font-semibold cursor-pointer select-none transition-all ${
+                                        checkedSubItems[sub.id]
+                                          ? "bg-slate-950/20 border-transparent opacity-40 line-through text-slate-500"
+                                          : "bg-slate-950/50 border-slate-900/60 text-slate-200 hover:border-sky-500/30 hover:bg-slate-950/80"
+                                      }`}
+                                    >
+                                      <div className="pt-0.5 shrink-0">
+                                        <Checkbox
+                                          id={sub.id}
+                                          checked={checkedSubItems[sub.id] || false}
+                                          onCheckedChange={(c) => handleSubCheck(item.id, sub.id, c === true)}
+                                          className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-500 data-[state=checked]:border-sky-500"
+                                        />
+                                      </div>
+                                      <div className="leading-relaxed">
+                                        {sub.title}
+                                      </div>
+                                    </label>
+                                  ))}
+                                </div>
+                              )}
+
                             </div>
                           )}
 
