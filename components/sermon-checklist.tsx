@@ -251,8 +251,8 @@ const workflowTabs: WorkflowTab[] = [
   },
 ];
 
-const STORAGE_KEY = "aholiab-checklist-state-v23";
-const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v23";
+const STORAGE_KEY = "aholiab-checklist-state-v24";
+const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v24";
 const EVANGELISM_KEY = "aholiab-evangelism-toggle";
 const FONT_SIZE_KEY = "aholiab-global-font-size";
 const THEME_KEY = "aholiab-global-theme";
@@ -509,7 +509,7 @@ export function SermonChecklist() {
       taskItemChecked: "bg-slate-100/60 border-transparent opacity-40",
       taskText: "text-slate-800",
       taskDesc: "text-slate-700 font-bold",
-      checkboxBorder: "border-slate-400 group-hover/item:border-blue-500 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600",
+      checkboxBorder: "border-slate-400 group-hover/item:border-blue-500 data-[state=checked]:bg-blue-600 data-[state=checked]:bg-blue-600",
       footerBox: "border-slate-300 shadow-inner bg-white/60 text-slate-600",
       footerScripture: "italic font-serif tracking-wide leading-relaxed text-slate-600",
       footerRef: "text-slate-500",
@@ -538,6 +538,10 @@ export function SermonChecklist() {
       taskDesc: "text-xs",
       footerScripture: "text-base font-bold",
       footerRef: "text-xs",
+      // SUB-ACCORDION ENGINE MATRICES
+      phaseHeader: "text-[10px] tracking-[0.15em]",
+      subTaskTitle: "text-[11px] font-semibold",
+      subTaskBtn: "text-[9px] h-6 px-2"
     },
     M: {
       pageTitle: "text-4xl md:text-5xl",
@@ -556,6 +560,10 @@ export function SermonChecklist() {
       taskDesc: "text-sm",
       footerScripture: "text-xl font-black leading-relaxed",
       footerRef: "text-sm",
+      // SUB-ACCORDION ENGINE MATRICES
+      phaseHeader: "text-[11px] tracking-[0.18em]",
+      subTaskTitle: "text-xs md:text-sm font-semibold",
+      subTaskBtn: "text-[10px] h-7 px-2.5"
     },
     L: {
       pageTitle: "text-5xl md:text-6xl",
@@ -574,6 +582,10 @@ export function SermonChecklist() {
       taskDesc: "text-base md:text-lg font-semibold",
       footerScripture: "text-3xl font-black leading-relaxed",
       footerRef: "text-base font-black tracking-widest",
+      // SUB-ACCORDION ENGINE MATRICES
+      phaseHeader: "text-sm font-black tracking-[0.2em]",
+      subTaskTitle: "text-base md:text-lg font-bold leading-normal",
+      subTaskBtn: "text-xs h-9 px-4 font-black"
     }
   }[fontSize];
 
@@ -851,7 +863,10 @@ export function SermonChecklist() {
                                       >
                                         <div className="flex items-center gap-2">
                                           <div className={`w-1 h-3 rounded-full bg-sky-400 transition-transform ${isPhaseOpen ? "scale-y-120" : "scale-y-50"}`} />
-                                          {phase.phaseName}
+                                          {/* ADAPTIVE FONT CONTROL INJECTED */}
+                                          <span className={`${fontStyles.phaseHeader} font-black uppercase`}>
+                                            {phase.phaseName}
+                                          </span>
                                         </div>
                                         {isPhaseOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
                                       </Button>
@@ -867,13 +882,14 @@ export function SermonChecklist() {
                                                   : "bg-slate-950/50 border-slate-900/60 hover:border-sky-500/20 hover:bg-slate-950/80"
                                               }`}
                                             >
-                                              <label className={`flex items-start gap-3.5 text-xs font-semibold cursor-pointer select-none ${checkedSubItems[sub.id] ? "line-through text-slate-500" : "text-slate-200"}`}>
+                                              {/* ADAPTIVE FONT CONTROL INJECTED */}
+                                              <label className={`flex items-start gap-3.5 font-semibold cursor-pointer select-none ${fontStyles.subTaskTitle} ${checkedSubItems[sub.id] ? "line-through text-slate-500" : "text-slate-200"}`}>
                                                 <div className="pt-0.5 shrink-0">
                                                   <Checkbox
                                                     id={sub.id}
                                                     checked={checkedSubItems[sub.id] || false}
                                                     onCheckedChange={(c) => handleSubCheck(item.id, sub.id, c === true)}
-                                                    className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:bg-sky-400"
+                                                    className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:border-sky-400"
                                                   />
                                                 </div>
                                                 <div className="leading-relaxed flex-1">
@@ -887,7 +903,8 @@ export function SermonChecklist() {
                                                     variant="outline"
                                                     size="sm"
                                                     onClick={() => handleActionClick(sub.customButton, sub.id)}
-                                                    className={`h-7 px-2.5 rounded text-[10px] font-black uppercase tracking-wider border-sky-500/20 text-sky-400 bg-sky-500/[0.02] hover:bg-sky-500/10 hover:text-sky-300 transition-all ${
+                                                    {/* ADAPTIVE FONT CONTROL INJECTED TO ACTION KEYS */}
+                                                    className={`rounded uppercase tracking-wider border-sky-500/20 text-sky-400 bg-sky-500/[0.02] hover:bg-sky-500/10 hover:text-sky-300 transition-all ${fontStyles.subTaskBtn} ${
                                                       sub.customButton.actionType === "copy" && copiedStatus[sub.id]
                                                         ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
                                                         : ""
@@ -919,9 +936,10 @@ export function SermonChecklist() {
                                     Step-by-Step Training Breakdown
                                   </div>
                                   {item.subTasks?.map((sub) => (
+                                    {/* ADAPTIVE FONT CONTROL INJECTED */}
                                     <label 
                                       key={sub.id}
-                                      className={`flex items-start gap-3.5 p-3 rounded-lg border text-xs font-semibold cursor-pointer select-none transition-all ${
+                                      className={`flex items-start gap-3.5 p-3 rounded-lg border font-semibold cursor-pointer select-none transition-all ${fontStyles.subTaskTitle} ${
                                         checkedSubItems[sub.id]
                                           ? "bg-slate-950/20 border-transparent opacity-40 line-through text-slate-500"
                                           : "bg-slate-950/50 border-slate-900/60 text-slate-200 hover:border-sky-500/30 hover:bg-slate-950/80"
@@ -932,7 +950,7 @@ export function SermonChecklist() {
                                           id={sub.id}
                                           checked={checkedSubItems[sub.id] || false}
                                           onCheckedChange={(c) => handleSubCheck(item.id, sub.id, c === true)}
-                                          className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:bg-sky-400"
+                                          className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:border-sky-400"
                                         />
                                       </div>
                                       <div className="leading-relaxed">
