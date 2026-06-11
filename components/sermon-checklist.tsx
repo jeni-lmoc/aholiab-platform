@@ -224,8 +224,8 @@ const workflowTabs: WorkflowTab[] = [
   },
 ];
 
-const STORAGE_KEY = "aholiab-checklist-state-v20";
-const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v20";
+const STORAGE_KEY = "aholiab-checklist-state-v21";
+const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v21";
 const EVANGELISM_KEY = "aholiab-evangelism-toggle";
 const FONT_SIZE_KEY = "aholiab-global-font-size";
 const THEME_KEY = "aholiab-global-theme";
@@ -239,7 +239,6 @@ export function SermonChecklist() {
   const [expandedPhases, setExpandedPhases] = useState<Record<string, boolean>>({});
   const [copiedStatus, setCopiedStatus] = useState<Record<string, boolean>>({});
   
-  // ACCORDION GATES POINTER CONTROL REGISTER
   const [isGatekeeperOpen, setIsGatekeeperOpen] = useState(false);
   const [pendingGatekeeperUrl, setPendingGatekeeperUrl] = useState("");
 
@@ -482,7 +481,7 @@ export function SermonChecklist() {
       taskItem: "bg-white border-slate-200 hover:border-blue-500 hover:bg-blue-50/[0.3] hover:shadow-sm",
       taskItemChecked: "bg-slate-100/60 border-transparent opacity-40",
       taskText: "text-slate-800",
-      taskDesc: "text-slate-700 font-bold", // CRITICAL HIGH-CONTRAST TEXT ADJUSTMENT FOR CLASSIC LIGHT
+      taskDesc: "text-slate-700 font-bold",
       checkboxBorder: "border-slate-400 group-hover/item:border-blue-500 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600",
       footerBox: "border-slate-300 shadow-inner bg-white/60 text-slate-600",
       footerScripture: "italic font-serif tracking-wide leading-relaxed text-slate-600",
@@ -942,7 +941,7 @@ export function SermonChecklist() {
       </div>
 
       {/* ==========================================
-          DYNAMIC INTERSTITIAL GATEKEEPER MODAL 
+          VERTICAL STACKED INTERSTITIAL MODAL 
          ========================================== */}
       {isGatekeeperOpen && (
         <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${themeStyles.modalOverlay}`}>
@@ -960,19 +959,20 @@ export function SermonChecklist() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-3 w-full pt-2">
+              {/* VERTICAL BUTTON STACK REFACTOR FOR TOTAL COMPACT FIT */}
+              <div className="flex flex-col gap-2 w-full pt-2">
+                <Button 
+                  onClick={executeGatekeeperLink}
+                  className="w-full text-xs font-black uppercase tracking-wider h-10 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:opacity-90 shadow-md shadow-cyan-900/20"
+                >
+                  Yes, Open Guide
+                </Button>
                 <Button 
                   variant="outline" 
                   onClick={() => { setIsGatekeeperOpen(false); setPendingGatekeeperUrl(""); }}
-                  className={`w-full text-xs font-bold uppercase tracking-wide h-9 rounded-xl ${themeStyles.modalCancelBtn}`}
+                  className={`w-full text-xs font-bold uppercase tracking-wide h-10 rounded-xl ${themeStyles.modalCancelBtn}`}
                 >
                   Cancel
-                </Button>
-                <Button 
-                  onClick={executeGatekeeperLink}
-                  className="w-full text-xs font-black uppercase tracking-wider h-9 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:opacity-90 shadow-md shadow-cyan-900/20"
-                >
-                  Yes, Open Guide
                 </Button>
               </div>
 
