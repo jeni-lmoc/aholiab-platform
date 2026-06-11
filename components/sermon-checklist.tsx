@@ -73,7 +73,6 @@ Do NOT create a slide deck`;
 
 const ADDITIONAL_INSTRUCTIONS_PROMPT = `DO NOT Summarize, rephrase, or add sub-titles. DO NOT omit any input text or make up new content. All card titles must use heading level 1 (H1), be center-aligned, use the same theme color consistently, and remain consistent across all slides. All body text must use large text size, be center-aligned and remain consistent across all slides. DO NOT use Arrows, Stats, Circle stats, Pyramid, Funnel, Cycle, Circle, Ring, Semi-circle, and Flower to illustrate card content. Sparingly use Images or icons with text, Timeline, Bullets, Bar stats, Steps, and Staircase. No additional comments. Just the verse or the quote on each page. Nothing extra, just the text as provided.`;
 
-
 // ==========================================
 // TYPE DEFINITIONS & DATA ARCHITECTURE
 // ==========================================
@@ -88,6 +87,7 @@ interface SubTask {
 }
 
 interface ProgressivePhase {
+  phaseId: string;
   phaseName: string;
   subTasks: SubTask[];
 }
@@ -98,7 +98,6 @@ interface ChecklistItem {
   description: string;
   isAfterglowRelated?: boolean;
   hasManualLink?: boolean;
-  // ENHANCED MATRIX: Now supports progressive disclosures or simple flat sub-tasks
   progressivePhases?: ProgressivePhase[];
   subTasks?: SubTask[]; 
 }
@@ -136,9 +135,9 @@ const workflowTabs: WorkflowTab[] = [
         title: "Verse Tech", 
         description: "Process raw outlines, generate AI text formatting, build the raw slide decks within Gamma, and set global styles.",
         hasManualLink: true,
-        // PREMIUM PROGRESSIVE DISCLOSURE ARCHITECTURE FOR VERSE TECH
         progressivePhases: [
           {
+            phaseId: "vt-phase-1",
             phaseName: "Phase 1: Intake & AI Prep",
             subTasks: [
               { id: "vt-p1-s1", title: "Locate the most recent sermon Word document in the Aholiab channel and download it to your machine." },
@@ -152,16 +151,17 @@ const workflowTabs: WorkflowTab[] = [
             ]
           },
           {
+            phaseId: "vt-phase-2",
             phaseName: "Phase 2: Gamma Slide Generation",
             subTasks: [
               { 
                 id: "vt-p2-s1", 
-                title: "In Gamma, click + Create New AI -> Paste in Text, paste your content, and set parameters to Presentation, Traditional (16:9), and 'Preserve this exact text'.",
+                title: "In Gamma, click + Create New AI -> Paste in Text, paste your content, and set parameters to Presentation, Traditional (16:9), and 'Preserve this exact text'. (Note: If your sermon text layout generates more than 75 total slides, click the button below to handle splitting and merging the decks).",
                 customButton: { label: "Managing Slide Limits Guide", actionType: "link", payload: GLOBAL_LINKS.managingSlideLimits }
               },
               { 
                 id: "vt-p2-s2", 
-                title: "Click Continue, switch layout to Freeform with 'Don't Add Images', and paste our enforcement block into the Additional Instructions box on the right.",
+                title: "Click Continue, switch layout to Freeform with 'Don't Add Images', and paste our copied additional instructions into the box on the right.",
                 customButton: { label: "Copy Additional Instructions", actionType: "copy", payload: ADDITIONAL_INSTRUCTIONS_PROMPT }
               },
               { id: "vt-p2-s3", title: "Click Generate. Once complete, run a swift visual scroll to confirm no rogue decorative shapes or graphic items leaked into the layout." },
@@ -169,9 +169,10 @@ const workflowTabs: WorkflowTab[] = [
             ]
           },
           {
+            phaseId: "vt-phase-3",
             phaseName: "Phase 3: Finalizing & Hand-off",
             subTasks: [
-              { id: "vt-p3-s1", title: "Navigate to Page setup... inside Gamma, change Base font size to L (Large), turn ON Card backdrops, add the Small Theme logo, and choose 'Hide on first card'." },
+              { id: "vt-p3-s1", title: "Navigate to Page setup... inside Gamma, change Base font size to L (Large), turn ON Card backdrops, add the Small Theme logo, and choose 'Hide on first and last card'." },
               { id: "vt-p3-s2", title: "Open the template directory, copy the second card from the Social Media Card deck, and paste it at the very end of your active sermon deck filmstrip." },
               { id: "vt-p3-s3", title: "Click 'Add a Card using AI' at the bottom of the filmstrip and paste the References Index prompt from the training manual to build your canon summary slide." },
               { id: "vt-p3-s4", title: "Click Share, set public parameters strictly to 'View' to lock all visual assets, and copy your secure view-only deck link." },
@@ -222,8 +223,8 @@ const workflowTabs: WorkflowTab[] = [
   },
 ];
 
-const STORAGE_KEY = "aholiab-checklist-state-v18";
-const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v18";
+const STORAGE_KEY = "aholiab-checklist-state-v19";
+const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v19";
 const EVANGELISM_KEY = "aholiab-evangelism-toggle";
 const FONT_SIZE_KEY = "aholiab-global-font-size";
 const THEME_KEY = "aholiab-global-theme";
@@ -234,6 +235,7 @@ export function SermonChecklist() {
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
   const [checkedSubItems, setCheckedSubItems] = useState<Record<string, boolean>>({});
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
+  const [expandedPhases, setExpandedPhases] = useState<Record<string, boolean>>({});
   const [copiedStatus, setCopiedStatus] = useState<Record<string, boolean>>({});
   
   const [isEvangelismSabbath, setIsEvangelismSabbath] = useState(false);
@@ -296,6 +298,7 @@ export function SermonChecklist() {
       setCheckedItems({});
       setCheckedSubItems({});
       setExpandedItems({});
+      setExpandedPhases({});
       setIsEvangelismSabbath(false);
     }
   };
@@ -336,6 +339,12 @@ export function SermonChecklist() {
     e.preventDefault();
     e.stopPropagation();
     setExpandedItems(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const togglePhaseAccordion = (phaseId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setExpandedPhases(prev => ({ ...prev, [phaseId]: !prev[prev[phaseId]] }));
   };
 
   const handleActionClick = (buttonSpec: any, subTaskId: string) => {
@@ -461,7 +470,7 @@ export function SermonChecklist() {
       taskItem: "bg-white border-slate-200 hover:border-blue-500 hover:bg-blue-50/[0.3] hover:shadow-sm",
       taskItemChecked: "bg-slate-100/60 border-transparent opacity-40",
       taskText: "text-slate-800",
-      taskDesc: "text-slate-500",
+      taskDesc: "text-slate-700 font-bold", // HIGH CONTRAST CHARCOAL INJECTION FOR SCANNABILITY
       checkboxBorder: "border-slate-400 group-hover/item:border-blue-500 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600",
       footerBox: "border-slate-300 shadow-inner bg-white/60 text-slate-600",
       footerScripture: "italic font-serif tracking-wide leading-relaxed text-slate-600",
@@ -731,7 +740,6 @@ export function SermonChecklist() {
                               </div>
                             </label>
 
-                            {/* DYNAMIC SUB-PHASE PROGRESS INJECTION AREA */}
                             <div className="flex-1 px-2 sm:px-6 flex items-center gap-3 w-full min-w-[120px]">
                               {hasSubTasks && isExpanded && (
                                 <>
@@ -770,86 +778,100 @@ export function SermonChecklist() {
 
                           </div>
 
-                          {/* EXPANDABLE WORKSPACE CONSOLE */}
+                          {/* EXPANDABLE MASTER WORKSPACE CONSOLE */}
                           {hasSubTasks && isExpanded && (
-                            <div className="border-t border-slate-900 bg-black/30 px-4 md:px-6 py-4 space-y-5 transition-all animate-in slide-in-from-top-2 duration-300">
+                            <div className="border-t border-slate-900 bg-black/30 px-4 md:px-6 py-4 space-y-4 transition-all animate-in slide-in-from-top-2 duration-300">
                               
-                              {/* EXTERNAL TRAINING MANUAL LINK COMPONENT ANCHOR */}
                               {item.hasManualLink && (
-                                <div className="flex justify-end pb-1 border-b border-slate-900">
+                                <div className="flex justify-end pb-1 border-b border-slate-900/60">
                                   <Button
                                     variant="link"
                                     onClick={() => window.open(GLOBAL_LINKS.trainingManual, "_blank", "noopener,noreferrer")}
-                                    className="h-auto p-0 text-[10px] font-black tracking-widest uppercase text-sky-400/80 hover:text-sky-300 flex items-center gap-1.5"
+                                    className="h-auto p-0 text-[10px] font-black tracking-widest uppercase text-sky-400 hover:text-sky-300 flex items-center gap-1.5"
                                   >
                                     <ExternalLink className="h-3 w-3" /> Open Full Verse Tech Manual
                                   </Button>
                                 </div>
                               )}
 
-                              {/* CONDITIONAL RENDER ENGINE: PROGRESSIVE PHASES OR STANDARD STRIPS */}
+                              {/* CONDITIONAL COMB MATRIX GENERATOR */}
                               {item.progressivePhases ? (
-                                item.progressivePhases.map((phase, pIdx) => (
-                                  <div key={pIdx} className="space-y-2">
-                                    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-sky-400 border-l-2 border-sky-500 pl-2 mb-2.5">
-                                      {phase.phaseName}
-                                    </div>
-                                    {phase.subTasks.map((sub) => (
-                                      <div 
-                                        key={sub.id} 
-                                        className={`flex flex-col p-3 rounded-lg border transition-all ${
-                                          checkedSubItems[sub.id]
-                                            ? "bg-slate-950/20 border-transparent opacity-45"
-                                            : "bg-slate-950/50 border-slate-900/60 hover:border-sky-500/20 hover:bg-slate-950/80"
+                                item.progressivePhases.map((phase) => {
+                                  const isPhaseOpen = expandedPhases[phase.phaseId] || false;
+                                  return (
+                                    <Card key={phase.phaseId} className="border border-slate-900/60 bg-slate-950/40 rounded-xl overflow-hidden shadow-md">
+                                      <Button
+                                        variant="ghost"
+                                        onClick={(e) => setExpandedPhases(p => ({ ...p, [phase.phaseId]: !isPhaseOpen }))}
+                                        className={`w-full justify-between h-11 px-4 text-xs font-black uppercase tracking-widest rounded-none border-b border-slate-950 transition-colors ${
+                                          isPhaseOpen ? "bg-sky-500/5 text-sky-400" : "bg-slate-950 text-slate-400 hover:text-slate-100"
                                         }`}
                                       >
-                                        <label className={`flex items-start gap-3.5 text-xs font-semibold cursor-pointer select-none ${checkedSubItems[sub.id] ? "line-through text-slate-500" : "text-slate-200"}`}>
-                                          <div className="pt-0.5 shrink-0">
-                                            <Checkbox
-                                              id={sub.id}
-                                              checked={checkedSubItems[sub.id] || false}
-                                              onCheckedChange={(c) => handleSubCheck(item.id, sub.id, c === true)}
-                                              className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-500 data-[state=checked]:border-sky-500"
-                                            />
-                                          </div>
-                                          <div className="leading-relaxed flex-1">
-                                            {sub.title}
-                                          </div>
-                                        </label>
+                                        <div className="flex items-center gap-2">
+                                          <div className={`w-1 h-3 rounded-full bg-sky-400 transition-transform ${isPhaseOpen ? "scale-y-120" : "scale-y-50"}`} />
+                                          {phase.phaseName}
+                                        </div>
+                                        {isPhaseOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                                      </Button>
 
-                                        {/* INLINE ACTIONS BLOCK (COPY/LINK MODALS) */}
-                                        {sub.customButton && (
-                                          <div className="pl-7.5 mt-2.5">
-                                            <Button
-                                              variant="outline"
-                                              size="sm"
-                                              onClick={() => handleActionClick(sub.customButton, sub.id)}
-                                              className={`h-7 px-2.5 rounded text-[10px] font-black uppercase tracking-wider transition-all ${
-                                                sub.customButton.actionType === "copy"
-                                                  ? copiedStatus[sub.id]
-                                                    ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
-                                                    : "bg-slate-900 border-slate-800 text-sky-400/90 hover:text-white hover:bg-slate-800"
-                                                  : "bg-slate-900 border-slate-800 text-purple-400 hover:text-white hover:bg-slate-800"
+                                      {isPhaseOpen && (
+                                        <div className="p-3 bg-black/10 space-y-2.5 animate-in slide-in-from-top-1 duration-200">
+                                          {phase.subTasks.map((sub) => (
+                                            <div 
+                                              key={sub.id} 
+                                              className={`flex flex-col p-3 rounded-lg border transition-all ${
+                                                checkedSubItems[sub.id]
+                                                  ? "bg-slate-950/20 border-transparent opacity-45"
+                                                  : "bg-slate-950/50 border-slate-900/60 hover:border-sky-500/20 hover:bg-slate-950/80"
                                               }`}
                                             >
-                                              {sub.customButton.actionType === "copy" ? (
-                                                copiedStatus[sub.id] ? (
-                                                  <><Check className="h-3 w-3 mr-1.5 shrink-0" /> Copied!</>
-                                                ) : (
-                                                  <><Copy className="h-3 w-3 mr-1.5 shrink-0" /> {sub.customButton.label}</>
-                                                )
-                                              ) : (
-                                                <><ExternalLink className="h-3 w-3 mr-1.5 shrink-0" /> {sub.customButton.label}</>
+                                              <label className={`flex items-start gap-3.5 text-xs font-semibold cursor-pointer select-none ${checkedSubItems[sub.id] ? "line-through text-slate-500" : "text-slate-200"}`}>
+                                                <div className="pt-0.5 shrink-0">
+                                                  <Checkbox
+                                                    id={sub.id}
+                                                    checked={checkedSubItems[sub.id] || false}
+                                                    onCheckedChange={(c) => handleSubCheck(item.id, sub.id, c === true)}
+                                                    className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:border-sky-400"
+                                                  />
+                                                </div>
+                                                <div className="leading-relaxed flex-1">
+                                                  {sub.title}
+                                                </div>
+                                              </label>
+
+                                              {sub.customButton && (
+                                                <div className="pl-7.5 mt-2.5">
+                                                  <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => handleActionClick(sub.customButton, sub.id)}
+                                                    className={`h-7 px-2.5 rounded text-[10px] font-black uppercase tracking-wider border-sky-500/20 text-sky-400 bg-sky-500/[0.02] hover:bg-sky-500/10 hover:text-sky-300 transition-all ${
+                                                      sub.customButton.actionType === "copy" && copiedStatus[sub.id]
+                                                        ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
+                                                        : ""
+                                                    }`}
+                                                  >
+                                                    {sub.customButton.actionType === "copy" ? (
+                                                      copiedStatus[sub.id] ? (
+                                                        <><Check className="h-3 w-3 mr-1.5 shrink-0" /> Copied!</>
+                                                      ) : (
+                                                        <><Copy className="h-3 w-3 mr-1.5 shrink-0" /> {sub.customButton.label}</>
+                                                      )
+                                                    ) : (
+                                                      <><ExternalLink className="h-3 w-3 mr-1.5 shrink-0" /> {sub.customButton.label}</>
+                                                    )}
+                                                  </Button>
+                                                </div>
                                               )}
-                                            </Button>
-                                          </div>
-                                        )}
-                                      </div>
-                                    ))}
-                                  </div>
-                                ))
+                                            </div>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </Card>
+                                  );
+                                })
                               ) : (
-                                // FALLBACK: CLEAN STANDARD FLAT TASKS LAYOUT
+                                // STANDARD PLAT TASKS ENGINE PORTAL
                                 <div className="space-y-2.5">
                                   <div className="text-[10px] font-black uppercase tracking-[0.15em] text-sky-400/80 mb-1">
                                     Step-by-Step Training Breakdown
@@ -868,7 +890,7 @@ export function SermonChecklist() {
                                           id={sub.id}
                                           checked={checkedSubItems[sub.id] || false}
                                           onCheckedChange={(c) => handleSubCheck(item.id, sub.id, c === true)}
-                                          className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-500 data-[state=checked]:border-sky-500"
+                                          className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:border-sky-400"
                                         />
                                       </div>
                                       <div className="leading-relaxed">
