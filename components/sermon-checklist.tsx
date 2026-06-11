@@ -175,18 +175,44 @@ const workflowTabs: WorkflowTab[] = [
             subTasks: [
               { id: "vt-p3-s1", title: "Navigate to Page setup... inside Gamma, change Base font size to L (Large), turn ON Card backdrops, add the Small Theme logo, and choose 'Hide on first and last card'." },
               { id: "vt-p3-s2", title: "Open the template directory, copy the second card from the Social Media Card deck, and paste it at the very end of your active sermon deck filmstrip." },
-              { id: "vt-p3-s3", title: "Click 'Add a Card using AI' at the bottom of the filmstrip and paste the References Index prompt from the training manual to build your canon summary slide." },
+              { id: "vt-p3-s3", title: "Click 'Add a Card using AI' at the bottom of the filmstrip and paste the References Index prompt from the training manual. Verify that this generated card perfectly cross-checks with the real scripture used in the deck." },
               { id: "vt-p3-s4", title: "Click Share, set public parameters strictly to 'View' to lock all visual assets, and copy your secure view-only deck link." },
               { 
                 id: "vt-p3-s5", 
                 title: "Open the Weekly Sermon Tracker in Slack, set status to Draft, paste the Gamma URL, upload the backup files, and send a direct hand-off notification DM to your POC.",
                 customButton: { label: "Open Weekly Sermon Tracker", actionType: "link", payload: GLOBAL_LINKS.weeklySermonTracker }
-              }
+              },
+              { id: "vt-p3-s6", title: "Stay synchronized on the Zoom/Slack audio huddle. If the Pastor requests last-minute slide changes, the POC will dictate the exact insertion point. If a Gamma sync bug corrupts formatting, notify the POC immediately to execute a clean backup fork." }
             ]
           }
         ]
       },
-      { id: "beautify", title: "Beautification", description: "Format and beautify the raw slides so they are finalized for the Pastor's review." },
+      { 
+        id: "beautify", 
+        title: "Beautification", 
+        description: "Format and beautify the raw slides so they are finalized for the Pastor's review.",
+        progressivePhases: [
+          {
+            phaseId: "b-phase-1",
+            phaseName: "Phase 1: Layout & Typography Scans",
+            subTasks: [
+              { id: "b-p1-s1", title: "Scan the deck for 'hanging words' (a single word left entirely alone on its own text line at the end of a passage)." },
+              { id: "b-p1-s2", title: "To mitigate hanging words, insert a balanced left or right side graphic container to compress the text column and re-flow text cleanly." },
+              { id: "b-p1-s3", title: "Identify dense, multi-verse blocks or massive non-Bible quotes. If a slide creates an unreadable wall of text, split it across multiple consecutive cards to ensure clean legibility." }
+            ]
+          },
+          {
+            phaseId: "b-phase-2",
+            phaseName: "Phase 2: Visual Enhancements & Audit",
+            subTasks: [
+              { id: "b-p2-s1", title: "Locate cards where a verse is extremely brief. Add aesthetic interest by embedding an image at the top or applying an entire background graphic container, keeping text highly readable." },
+              { id: "b-p2-s2", title: "Audit the full thumbnail timeline track. Ensure a balanced pacing of elements across the presentation, avoiding image clustering (e.g., three image slides stacked together followed by ten blank ones)." },
+              { id: "b-p2-s3", title: "Verify that zero transitions or element motion animations have been added anywhere in the presentation—all slides must remain static for stable broadcast production." },
+              { id: "b-p2-s4", title: "Confirm that every added visual asset strictly aligns with the spiritual context of the specific passage and honors the core custom theme palette." }
+            ]
+          }
+        ]
+      },
     ],
   },
   {
@@ -224,8 +250,8 @@ const workflowTabs: WorkflowTab[] = [
   },
 ];
 
-const STORAGE_KEY = "aholiab-checklist-state-v21";
-const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v21";
+const STORAGE_KEY = "aholiab-checklist-state-v22";
+const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v22";
 const EVANGELISM_KEY = "aholiab-evangelism-toggle";
 const FONT_SIZE_KEY = "aholiab-global-font-size";
 const THEME_KEY = "aholiab-global-theme";
@@ -905,7 +931,7 @@ export function SermonChecklist() {
                                           id={sub.id}
                                           checked={checkedSubItems[sub.id] || false}
                                           onCheckedChange={(c) => handleSubCheck(item.id, sub.id, c === true)}
-                                          className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:border-sky-400"
+                                          className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:bg-sky-400"
                                         />
                                       </div>
                                       <div className="leading-relaxed">
@@ -959,7 +985,6 @@ export function SermonChecklist() {
                 </p>
               </div>
 
-              {/* VERTICAL BUTTON STACK REFACTOR FOR TOTAL COMPACT FIT */}
               <div className="flex flex-col gap-2 w-full pt-2">
                 <Button 
                   onClick={executeGatekeeperLink}
