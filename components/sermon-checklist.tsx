@@ -19,6 +19,7 @@ import {
   ExternalLink,
   Copy,
   Check,
+  AlertTriangle,
 } from "lucide-react";
 
 // ==========================================
@@ -81,7 +82,7 @@ interface SubTask {
   title: string;
   customButton?: {
     label: string;
-    actionType: "copy" | "link";
+    actionType: "copy" | "link" | "gatekeeper-link";
     payload: string;
   };
 }
@@ -156,8 +157,8 @@ const workflowTabs: WorkflowTab[] = [
             subTasks: [
               { 
                 id: "vt-p2-s1", 
-                title: "In Gamma, click + Create New AI -> Paste in Text, paste your content, and set parameters to Presentation, Traditional (16:9), and 'Preserve this exact text'. (Note: If your sermon text layout generates more than 75 total slides, click the button below to handle splitting and merging the decks).",
-                customButton: { label: "Managing Slide Limits Guide", actionType: "link", payload: GLOBAL_LINKS.managingSlideLimits }
+                title: "In Gamma, click + Create New AI -> Paste in Text, paste your content, and set parameters to Presentation, Traditional (16:9), and 'Preserve this exact text'.",
+                customButton: { label: "⚠️ Click here if you have more than 75 slides", actionType: "gatekeeper-link", payload: GLOBAL_LINKS.managingSlideLimits }
               },
               { 
                 id: "vt-p2-s2", 
@@ -223,8 +224,8 @@ const workflowTabs: WorkflowTab[] = [
   },
 ];
 
-const STORAGE_KEY = "aholiab-checklist-state-v19";
-const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v19";
+const STORAGE_KEY = "aholiab-checklist-state-v20";
+const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v20";
 const EVANGELISM_KEY = "aholiab-evangelism-toggle";
 const FONT_SIZE_KEY = "aholiab-global-font-size";
 const THEME_KEY = "aholiab-global-theme";
@@ -238,6 +239,10 @@ export function SermonChecklist() {
   const [expandedPhases, setExpandedPhases] = useState<Record<string, boolean>>({});
   const [copiedStatus, setCopiedStatus] = useState<Record<string, boolean>>({});
   
+  // ACCORDION GATES POINTER CONTROL REGISTER
+  const [isGatekeeperOpen, setIsGatekeeperOpen] = useState(false);
+  const [pendingGatekeeperUrl, setPendingGatekeeperUrl] = useState("");
+
   const [isEvangelismSabbath, setIsEvangelismSabbath] = useState(false);
   const [fontSize, setFontSize] = useState<"S" | "M" | "L">("M");
   const [currentTheme, setCurrentTheme] = useState<AppTheme>("Dark");
@@ -257,7 +262,7 @@ export function SermonChecklist() {
     if (savedEvangelism) setIsEvangelismSabbath(JSON.parse(savedEvangelism));
     if (savedFontSize === "S" || savedFontSize === "M" || savedFontSize === "L") setFontSize(savedFontSize);
     
-    if (savedTheme === "Light") setCurrentTheme("Light");
+    if (savedTheme === "Light") setCurrentTheme(savedTheme);
     else setCurrentTheme("Dark");
 
     const today = new Date();
@@ -341,14 +346,11 @@ export function SermonChecklist() {
     setExpandedItems(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const togglePhaseAccordion = (phaseId: string, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setExpandedPhases(prev => ({ ...prev, [phaseId]: !prev[prev[phaseId]] }));
-  };
-
   const handleActionClick = (buttonSpec: any, subTaskId: string) => {
-    if (buttonSpec.actionType === "link") {
+    if (buttonSpec.actionType === "gatekeeper-link") {
+      setPendingGatekeeperUrl(buttonSpec.payload);
+      setIsGatekeeperOpen(true);
+    } else if (buttonSpec.actionType === "link") {
       window.open(buttonSpec.payload, "_blank", "noopener,noreferrer");
     } else if (buttonSpec.actionType === "copy") {
       navigator.clipboard.writeText(buttonSpec.payload);
@@ -357,6 +359,12 @@ export function SermonChecklist() {
         setCopiedStatus(prev => ({ ...prev, [subTaskId]: false }));
       }, 2000);
     }
+  };
+
+  const executeGatekeeperLink = () => {
+    window.open(pendingGatekeeperUrl, "_blank", "noopener,noreferrer");
+    setIsGatekeeperOpen(false);
+    setPendingGatekeeperUrl("");
   };
 
   const getSubProgress = (item: ChecklistItem) => {
@@ -434,11 +442,15 @@ export function SermonChecklist() {
       taskItemChecked: "bg-sky-400/[0.02] border-transparent opacity-40",
       taskText: "text-white",
       taskDesc: "text-slate-400",
-      checkboxBorder: "border-slate-400 group-hover/item:border-sky-400 data-[state=checked]:bg-sky-400 data-[state=checked]:border-sky-400",
+      checkboxBorder: "border-slate-400 group-hover/item:border-sky-400 data-[state=checked]:bg-sky-400 data-[state=checked]:bg-sky-400",
       
       footerBox: "border-slate-800/80 bg-slate-900/75 shadow-xl backdrop-blur-md text-slate-300",
       footerScripture: "italic font-serif tracking-wide leading-relaxed text-slate-300",
-      footerRef: "text-white"
+      footerRef: "text-white",
+
+      modalOverlay: "bg-black/75 backdrop-blur-sm",
+      modalContent: "bg-slate-900 border border-slate-800 text-slate-100",
+      modalCancelBtn: "bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700"
     },
     Light: {
       bg: "bg-gradient-to-b from-sky-300 via-[#f8fafc] to-[#fae8ff] text-slate-800 selection:bg-blue-200",
@@ -470,11 +482,15 @@ export function SermonChecklist() {
       taskItem: "bg-white border-slate-200 hover:border-blue-500 hover:bg-blue-50/[0.3] hover:shadow-sm",
       taskItemChecked: "bg-slate-100/60 border-transparent opacity-40",
       taskText: "text-slate-800",
-      taskDesc: "text-slate-700 font-bold", // HIGH CONTRAST CHARCOAL INJECTION FOR SCANNABILITY
+      taskDesc: "text-slate-700 font-bold", // CRITICAL HIGH-CONTRAST TEXT ADJUSTMENT FOR CLASSIC LIGHT
       checkboxBorder: "border-slate-400 group-hover/item:border-blue-500 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600",
       footerBox: "border-slate-300 shadow-inner bg-white/60 text-slate-600",
       footerScripture: "italic font-serif tracking-wide leading-relaxed text-slate-600",
-      footerRef: "text-slate-500"
+      footerRef: "text-slate-500",
+
+      modalOverlay: "bg-slate-900/40 backdrop-blur-sm",
+      modalContent: "bg-white border border-slate-200 text-slate-900 shadow-2xl",
+      modalCancelBtn: "bg-slate-100 text-slate-800 border-slate-300 hover:bg-slate-200"
     }
   }[currentTheme];
 
@@ -794,7 +810,7 @@ export function SermonChecklist() {
                                 </div>
                               )}
 
-                              {/* CONDITIONAL COMB MATRIX GENERATOR */}
+                              {/* CONDITIONAL NESTED ACCORDION MATRIX ENGINE */}
                               {item.progressivePhases ? (
                                 item.progressivePhases.map((phase) => {
                                   const isPhaseOpen = expandedPhases[phase.phaseId] || false;
@@ -871,7 +887,7 @@ export function SermonChecklist() {
                                   );
                                 })
                               ) : (
-                                // STANDARD PLAT TASKS ENGINE PORTAL
+                                // STANDARD FLAT STRIP RE-RENDER
                                 <div className="space-y-2.5">
                                   <div className="text-[10px] font-black uppercase tracking-[0.15em] text-sky-400/80 mb-1">
                                     Step-by-Step Training Breakdown
@@ -924,6 +940,47 @@ export function SermonChecklist() {
         </div>
 
       </div>
+
+      {/* ==========================================
+          DYNAMIC INTERSTITIAL GATEKEEPER MODAL 
+         ========================================== */}
+      {isGatekeeperOpen && (
+        <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${themeStyles.modalOverlay}`}>
+          <Card className={`w-full max-w-sm p-6 rounded-2xl shadow-2xl animate-in fade-in zoom-in-95 duration-200 ${themeStyles.modalContent}`}>
+            <div className="flex flex-col items-center text-center space-y-4">
+              
+              <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center border border-amber-500/30 text-amber-500">
+                <AlertTriangle className="h-6 w-6" />
+              </div>
+
+              <div className="space-y-1">
+                <h4 className="text-base font-black uppercase tracking-wider">Are you sure?</h4>
+                <p className="text-xs opacity-70 font-medium leading-relaxed">
+                  You only need this guide if today&apos;s sermon contains more than 75 total slide blocks from Gemini.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3 w-full pt-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => { setIsGatekeeperOpen(false); setPendingGatekeeperUrl(""); }}
+                  className={`w-full text-xs font-bold uppercase tracking-wide h-9 rounded-xl ${themeStyles.modalCancelBtn}`}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={executeGatekeeperLink}
+                  className="w-full text-xs font-black uppercase tracking-wider h-9 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:opacity-90 shadow-md shadow-cyan-900/20"
+                >
+                  Yes, Open Guide
+                </Button>
+              </div>
+
+            </div>
+          </Card>
+        </div>
+      )}
+
     </div>
   );
 }
