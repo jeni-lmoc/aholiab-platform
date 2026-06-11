@@ -198,7 +198,8 @@ const workflowTabs: WorkflowTab[] = [
             subTasks: [
               { id: "b-p1-s1", title: "Scan the deck for 'hanging words' (a single word left entirely alone on its own text line at the end of a passage)." },
               { id: "b-p1-s2", title: "To mitigate hanging words, insert a balanced left or right side graphic container to compress the text column and re-flow text cleanly." },
-              { id: "b-p1-s3", title: "Identify dense, multi-verse blocks or massive non-Bible quotes. If a slide creates an unreadable wall of text, split it across multiple consecutive cards to ensure clean legibility." }
+              { id: "b-p1-s3", title: "Identify dense, multi-verse blocks or massive non-Bible quotes. If a slide creates an unreadable wall of text, split it across multiple consecutive cards to ensure clean legibility." },
+              { id: "b-p1-s4", title: "Cross-check today's finished slide cards against the pastor's original downloaded Word document. Manually re-apply bold styling to any emphasis words or key phrases that were stripped during the AI import process." }
             ]
           },
           {
@@ -250,8 +251,8 @@ const workflowTabs: WorkflowTab[] = [
   },
 ];
 
-const STORAGE_KEY = "aholiab-checklist-state-v22";
-const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v22";
+const STORAGE_KEY = "aholiab-checklist-state-v23";
+const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v23";
 const EVANGELISM_KEY = "aholiab-evangelism-toggle";
 const FONT_SIZE_KEY = "aholiab-global-font-size";
 const THEME_KEY = "aholiab-global-theme";
@@ -872,7 +873,7 @@ export function SermonChecklist() {
                                                     id={sub.id}
                                                     checked={checkedSubItems[sub.id] || false}
                                                     onCheckedChange={(c) => handleSubCheck(item.id, sub.id, c === true)}
-                                                    className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:border-sky-400"
+                                                    className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:bg-sky-400"
                                                   />
                                                 </div>
                                                 <div className="leading-relaxed flex-1">
