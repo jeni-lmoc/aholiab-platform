@@ -29,7 +29,9 @@ const GLOBAL_LINKS = {
   trainingManual: "https://docs.google.com/document/d/1_Bt7oG56msLcRYvy2UqFG4DY8FkXiRbnLQuKi6SQb2U/edit?usp=drive_link",
   managingSlideLimits: "https://docs.google.com/document/d/1_Bt7oG56msLcRYvy2UqFG4DY8FkXiRbnLQuKi6SQb2U/edit?tab=t.ymklsy324605",
   weeklySermonTracker: "https://lmoc.slack.com/lists/T09C5S0VDK8/F0AT40A4ZDE",
-  alternateExportOptions: "https://docs.google.com/document/d/1MjkCwoF0lJf-5jIlyzsTo7WIQrcc_gJlbFTtCoHSffE/edit?tab=t.f1e89nk8dsb8"
+  alternateExportOptions: "https://docs.google.com/document/d/1MjkCwoF0lJf-5jIlyzsTo7WIQrcc_gJlbFTtCoHSffE/edit?tab=t.f1e89nk8dsb8",
+  adobeMerge: "https://www.adobe.com/acrobat/online/merge-pdf.html",
+  qrGenerator: "https://login.qr-code-generator.com/"
 };
 
 const MASTER_AI_PROMPT = `Clean and format the attached document into text format for input into Gamma.
@@ -381,7 +383,65 @@ const workflowTabs: WorkflowTab[] = [
           }
         ]
       },
-      { id: "qr-code", title: "QR Code Update", description: "Create PDFs, combine them, compress to under 20MB, upload, and save." },
+      { 
+        id: "qr-code", 
+        title: "QR Code Update", 
+        description: "Compile and publish the master QR code asset payload for attendee distribution.",
+        progressivePhases: [
+          {
+            phaseId: "qr-phase-1",
+            phaseName: "Phase 1: PDF Collection & Coordination",
+            subTasks: [
+              { 
+                id: "qr-p1-s1", 
+                title: "Open the Weekly Sermon Tracker in Slack to check your file payloads. If any PDFs are missing from the row, do not enter Gamma yourself—immediately alert your POC in the huddle so the creator can log it. Download the assets once present:",
+                nestedSubTasks: [
+                  "Verify and download the complete Sermon Slides PDF from the tracker list.",
+                  "Verify and download the finished Afterglow Study Guide PDF from the tracker list.",
+                  "Verify and download the finished 6-Day Extended Study Guide PDF from the tracker list."
+                ]
+              }
+            ]
+          },
+          {
+            phaseId: "qr-phase-2",
+            phaseName: "Phase 2: Adobe Merge & Compression",
+            subTasks: [
+              { 
+                id: "qr-p2-s1", 
+                title: "Launch the file compilation interface and process the combined document track:",
+                nestedSubTasks: [
+                  "Drag and drop all three downloaded asset PDFs directly into the browser workspace panel.",
+                  "Double-check and arrange the file index priority sequence: 1. Sermon Slides, 2. Afterglow Study, 3. 6-Day Extended Study.",
+                  "Select 'Combine & Compress' from the tool settings and lock the parameter to 'Most Compression' to stay under 20MB.",
+                  "Verify the file order layout looks complete in the live asset review preview, then click Download."
+                ],
+                inlineButtonUnderNested: { label: "📑 Open Adobe Merge Hub", actionType: "link", payload: GLOBAL_LINKS.adobeMerge }
+              }
+            ]
+          },
+          {
+            phaseId: "qr-phase-3",
+            phaseName: "Phase 3: QR Portal Configuration & Verification",
+            subTasks: [
+              { id: "qr-p3-s1", title: "Log in to the QR Code Generator portal and click on the very top QR code entry item listed in your account workspace (the upcoming sermon slot)." },
+              { id: "qr-p3-s2", title: "Update the Text Title Field: Delete the generic label 'Sermon Slides', type in the actual active sermon title name, and make sure to preserve the date stamp already listed at the end." },
+              { 
+                id: "qr-p3-s3", 
+                title: "Upload the Master Asset payload and bind your view assets to the active portal profile:",
+                nestedSubTasks: [
+                  "Click Details -> Click Edit -> Locate the PDF Upload category zone.",
+                  "Click the blue Change button and drag-and-drop your compressed, merged PDF file into the upload window.",
+                  "Note: Leave the Website link field and all other pre-configured profile fields completely unchanged.",
+                  "Click Save Changes, wait for the processing confirmation banner, click Back, and review the live preview slot.",
+                  "Confirm the thumbnail panel accurately displays page one of the sermon slides instead of 'Slides available after sermon'."
+                ],
+                inlineButtonUnderNested: { label: "🌐 Open QR Generator Portal", actionType: "link", payload: GLOBAL_LINKS.qrGenerator }
+              }
+            ]
+          }
+        ]
+      },
       { id: "website", title: "Sites", description: "Upload the sermon video link, the main slide deck, the study guides, and the combined PDF to the site." },
     ],
   },
@@ -407,8 +467,8 @@ const workflowTabs: WorkflowTab[] = [
   },
 ];
 
-const STORAGE_KEY = "aholiab-checklist-state-v30";
-const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v30";
+const STORAGE_KEY = "aholiab-checklist-state-v31";
+const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v31";
 const EVANGELISM_KEY = "aholiab-evangelism-toggle";
 const FONT_SIZE_KEY = "aholiab-global-font-size";
 const THEME_KEY = "aholiab-global-theme";
@@ -739,7 +799,7 @@ export function SermonChecklist() {
       taskItemChecked: "bg-slate-100/60 border-transparent opacity-40",
       taskText: "text-slate-800",
       taskDesc: "text-slate-700 font-bold",
-      checkboxBorder: "border-slate-400 group-hover/item:border-blue-500 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600",
+      checkboxBorder: "border-slate-400 group-hover/item:border-blue-500 data-[state=checked]:bg-blue-600 data-[state=checked]:bg-blue-600",
       footerBox: "border-slate-300 shadow-inner bg-white/60 text-slate-600",
       footerScripture: "italic font-serif tracking-wide leading-relaxed text-slate-600",
       footerRef: "text-slate-500",
@@ -1265,7 +1325,7 @@ export function SermonChecklist() {
                 <p className="text-xs opacity-70 font-medium leading-relaxed">
                   {gatekeeperMode === "slide-limit" 
                     ? "You only need this guide if today's sermon contains more than 75 total slide blocks from Gemini."
-                    : "You only need this guide if the PDF didn't render correctly or if the text shrunk and is too small to view."
+                    : "You only need this guide if the PDF didn't render correctly or if the text shrunk and is too small to view."[cite: 2]
                   }
                 </p>
               </div>
