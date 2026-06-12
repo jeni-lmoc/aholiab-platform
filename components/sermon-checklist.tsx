@@ -186,8 +186,26 @@ const workflowTabs: WorkflowTab[] = [
             phaseId: "vt-phase-3",
             phaseName: "Phase 3: Finalizing & Hand-off",
             subTasks: [
-              { id: "vt-p3-s1", title: "Navigate to Page setup... inside Gamma, change Base font size to L (Large), turn ON Card backdrops, add the Small Theme logo, and choose 'Hide on first and last card'." },
-              { id: "vt-p3-s2", title: "Navigate to the Current Sabbath folder, open up the Social Media slide deck, copy the second slide in that deck (Social Media card), and paste it at the very end of your active sermon deck filmstrip." },
+              { 
+                id: "vt-p3-s1", 
+                title: "Navigate to Page setup... inside Gamma and configure your core visual formatting layout settings:",
+                nestedSubTasks: [
+                  "Change Base font size to L (Large).",
+                  "Turn ON Card backdrops checkbox parameter toggle.",
+                  "Add the Theme logo to the lower right corner, slider set to S (Small).",
+                  "At the top visibility filter, select Hide on first and last card."
+                ]
+              },
+              { 
+                id: "vt-p3-s2", 
+                title: "Import the standard church media assets from your shared local directory folders:",
+                nestedSubTasks: [
+                  "Open the Current Sabbath folder on your active machine.",
+                  "Launch the Social Media slide deck project inside Gamma.",
+                  "Copy the second slide in that deck (the custom Social Media card).",
+                  "Paste it cleanly at the very end of your active sermon deck filmstrip timeline."
+                ]
+              },
               { id: "vt-p3-s3", title: "Click 'Add a Card using AI' at the bottom of the filmstrip and paste the References Index prompt from the training manual. Verify that this generated card perfectly cross-checks with the real scripture used in the deck." },
               { id: "vt-p3-s4", title: "Click Share, set public parameters strictly to 'View' to lock all visual assets, and copy your secure view-only deck link." },
               { 
@@ -289,7 +307,16 @@ const workflowTabs: WorkflowTab[] = [
             phaseName: "Phase 4: Content Cleanup & Sermon Tracker Logging",
             subTasks: [
               { id: "ag-p4-s1", title: "Manually audit the content cards: Ensure all Bible book names are completely uniform (all full names or all 3-character shorts), and replace all long dashes (—) with proper punctuations." },
-              { id: "ag-p4-s2", title: "Navigate to the Current Sabbath folder, open up the Social Media slide deck, and copy the third slide in that deck (the Phototheology card). Paste it as the absolute final card in this slide deck." },
+              { 
+                id: "ag-p4-s2", 
+                title: "Import the standard church media assets from your shared local directory folders:",
+                nestedSubTasks: [
+                  "Open the Current Sabbath folder on your active machine.",
+                  "Launch the Social Media slide deck project inside Gamma.",
+                  "Copy the third slide in that deck (the custom Phototheology card).",
+                  "Paste it cleanly as the absolute final card in this slide deck."
+                ]
+              },
               { 
                 id: "ag-p4-s3", 
                 title: "Click 'Share' on the top menu bar, select 'Export' on the left menu, and click 'Export to PDF'. Open the file to verify text sizing. (If text shrinkage occurred, click the troubleshooting button below to open the Google Slides workaround).",
@@ -362,7 +389,16 @@ const workflowTabs: WorkflowTab[] = [
             phaseName: "Phase 4: Content Cleanup & Sermon Tracker Logging",
             subTasks: [
               { id: "ex-p4-s1", title: "Manually audit the content cards: Ensure all Bible book names are completely uniform, and replace all long dashes (—) with proper punctuations." },
-              { id: "ex-p4-s2", title: "Navigate to the Current Sabbath folder, open up the Social Media slide deck, and copy the third slide in that deck (the Phototheology card). Paste it as the absolute final card in this slide deck." },
+              { 
+                id: "ex-p4-s2", 
+                title: "Import the standard church media assets from your shared local directory folders:",
+                nestedSubTasks: [
+                  "Open the Current Sabbath folder on your active machine.",
+                  "Launch the Social Media slide deck project inside Gamma.",
+                  "Copy the third slide in that deck (the custom Phototheology card).",
+                  "Paste it cleanly as the absolute final card in this slide deck."
+                ]
+              },
               { 
                 id: "ex-p4-s3", 
                 title: "Click 'Share' on the top menu bar, select 'Export' on the left menu, and click 'Export to PDF'. Open the file to verify text sizing. (If text shrinkage occurred, click the troubleshooting button below to open the Google Slides workaround).",
@@ -457,18 +493,25 @@ const workflowTabs: WorkflowTab[] = [
         title: "Site Update", 
         description: "Replace the live stream archive container with the finalized, edited sermon-only YouTube video link (typically 1-2 days post-service).",
         subTasks: [
-          { id: "site-sub-1", title: "Copy the new sermon-only YouTube link, open the sermon site editor page, and click the three dots icon next to the video container." },
-          { id: "site-sub-2", title: "Delete the old livestream link, paste the new sermon link into the space, and click the checkmark icon to save the swap." },
-          { id: "site-sub-3", title: "Click the Publish button in the upper right corner to push the updated page live." },
-          { id: "site-sub-4", title: "Open the live public sermon site and verify that the correct sermon-only video plays flawlessly." }
+          { 
+            id: "site-sub-main-loop", 
+            title: "Process the sermon-only media file replacement track inside your cloud site console editor:",
+            nestedSubTasks: [
+              "Copy the new sermon-only YouTube link from your video manager channel.",
+              "Open the sermon site editor page and click the three dots icon next to the video container.",
+              "Delete the old livestream archive link and paste the new sermon link into the space.",
+              "Click the Publish button in the upper right corner to push the updated page live.",
+              "Open a live public sermon site incognito tab and verify the new video plays flawlessly."
+            ]
+          }
         ]
       },
     ],
   },
 ];
 
-const STORAGE_KEY = "aholiab-checklist-state-v33";
-const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v33";
+const STORAGE_KEY = "aholiab-checklist-state-v34";
+const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v34";
 const EVANGELISM_KEY = "aholiab-evangelism-toggle";
 const FONT_SIZE_KEY = "aholiab-global-font-size";
 const THEME_KEY = "aholiab-global-theme";
@@ -1271,7 +1314,7 @@ export function SermonChecklist() {
                                           id={sub.id}
                                           checked={checkedSubItems[sub.id] || false}
                                           onCheckedChange={(c) => handleSubCheck(item.id, sub.id, c === true)}
-                                          className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:bg-sky-400"
+                                          className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:border-sky-400"
                                         />
                                       </div>
                                       <div className="leading-relaxed">
