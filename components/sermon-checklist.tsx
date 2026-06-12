@@ -87,13 +87,13 @@ interface SubTask {
   title: string;
   customButton?: {
     label: string;
-    actionType: "copy" | "link" | "gatekeeper-link";
+    actionType: "copy" | "link" | "gatekeeper-link" | "gatekeeper-export-link";
     payload: string;
   };
   nestedSubTasks?: string[];
   inlineButtonUnderNested?: {
     label: string;
-    actionType: "copy" | "link" | "gatekeeper-link";
+    actionType: "copy" | "link" | "gatekeeper-link" | "gatekeeper-export-link";
     payload: string;
   };
 }
@@ -291,7 +291,7 @@ const workflowTabs: WorkflowTab[] = [
               { 
                 id: "ag-p4-s3", 
                 title: "Click 'Share' on the top menu bar, select 'Export' on the left menu, and click 'Export to PDF'. Open the file to verify text sizing. (If text shrinkage occurred, click the troubleshooting button below to open the Google Slides workaround).",
-                customButton: { label: "⚠️ Alternate Export Options Guide", actionType: "gatekeeper-link", payload: GLOBAL_LINKS.alternateExportOptions }
+                customButton: { label: "⚠️ Alternate Export Options Guide", actionType: "gatekeeper-export-link", payload: GLOBAL_LINKS.alternateExportOptions }
               },
               { id: "ag-p4-s4", title: "Re-open that same 'Share' menu and copy your secure view-only link to your clipboard so it is the most recent item copied." },
               { 
@@ -364,7 +364,7 @@ const workflowTabs: WorkflowTab[] = [
               { 
                 id: "ex-p4-s3", 
                 title: "Click 'Share' on the top menu bar, select 'Export' on the left menu, and click 'Export to PDF'. Open the file to verify text sizing. (If text shrinkage occurred, click the troubleshooting button below to open the Google Slides workaround).",
-                customButton: { label: "⚠️ Alternate Export Options Guide", actionType: "gatekeeper-link", payload: GLOBAL_LINKS.alternateExportOptions }
+                customButton: { label: "⚠️ Alternate Export Options Guide", actionType: "gatekeeper-export-link", payload: GLOBAL_LINKS.alternateExportOptions }
               },
               { id: "ex-p4-s4", title: "Re-open that same 'Share' menu and copy your secure view-only link to your clipboard so it is the most recent item copied." },
               { 
@@ -407,8 +407,8 @@ const workflowTabs: WorkflowTab[] = [
   },
 ];
 
-const STORAGE_KEY = "aholiab-checklist-state-v29";
-const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v29";
+const STORAGE_KEY = "aholiab-checklist-state-v30";
+const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v30";
 const EVANGELISM_KEY = "aholiab-evangelism-toggle";
 const FONT_SIZE_KEY = "aholiab-global-font-size";
 const THEME_KEY = "aholiab-global-theme";
@@ -424,6 +424,7 @@ export function SermonChecklist() {
   
   const [isGatekeeperOpen, setIsGatekeeperOpen] = useState(false);
   const [pendingGatekeeperUrl, setPendingGatekeeperUrl] = useState("");
+  const [gatekeeperMode, setGatekeeperMode] = useState<"slide-limit" | "export-shrink">("slide-limit");
 
   const [isEvangelismSabbath, setIsEvangelismSabbath] = useState(false);
   const [fontSize, setFontSize] = useState<"S" | "M" | "L">("M");
@@ -582,6 +583,11 @@ export function SermonChecklist() {
   const handleActionClick = (buttonSpec: any, subTaskId: string) => {
     if (buttonSpec.actionType === "gatekeeper-link") {
       setPendingGatekeeperUrl(buttonSpec.payload);
+      setGatekeeperMode("slide-limit");
+      setIsGatekeeperOpen(true);
+    } else if (buttonSpec.actionType === "gatekeeper-export-link") {
+      setPendingGatekeeperUrl(buttonSpec.payload);
+      setGatekeeperMode("export-shrink");
       setIsGatekeeperOpen(true);
     } else if (buttonSpec.actionType === "link") {
       window.open(buttonSpec.payload, "_blank", "noopener,noreferrer");
@@ -733,7 +739,7 @@ export function SermonChecklist() {
       taskItemChecked: "bg-slate-100/60 border-transparent opacity-40",
       taskText: "text-slate-800",
       taskDesc: "text-slate-700 font-bold",
-      checkboxBorder: "border-slate-400 group-hover/item:border-blue-500 data-[state=checked]:bg-blue-600 data-[state=checked]:bg-blue-600",
+      checkboxBorder: "border-slate-400 group-hover/item:border-blue-500 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600",
       footerBox: "border-slate-300 shadow-inner bg-white/60 text-slate-600",
       footerScripture: "italic font-serif tracking-wide leading-relaxed text-slate-600",
       footerRef: "text-slate-500",
@@ -1163,7 +1169,7 @@ export function SermonChecklist() {
                                                     size="sm"
                                                     onClick={() => handleActionClick(sub.customButton, sub.id)}
                                                     className={`rounded uppercase tracking-wider border-sky-500/20 text-sky-400 bg-sky-500/[0.02] hover:bg-sky-500/10 hover:text-sky-300 transition-all ${fontStyles.subTaskBtn} ${
-                                                      sub.customButton.actionType === "copy" && copiedStatus[sub.id]
+                                                      sub.customButton.actionType.startsWith("gatekeeper") && copiedStatus[sub.id]
                                                         ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
                                                         : ""
                                                     }`}
@@ -1207,7 +1213,7 @@ export function SermonChecklist() {
                                           id={sub.id}
                                           checked={checkedSubItems[sub.id] || false}
                                           onCheckedChange={(c) => handleSubCheck(item.id, sub.id, c === true)}
-                                          className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:bg-sky-400"
+                                          className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:border-sky-400"
                                         />
                                       </div>
                                       <div className="leading-relaxed">
@@ -1257,7 +1263,10 @@ export function SermonChecklist() {
               <div className="space-y-1">
                 <h4 className="text-base font-black uppercase tracking-wider">Are you sure?</h4>
                 <p className="text-xs opacity-70 font-medium leading-relaxed">
-                  You only need this guide if today&apos;s sermon contains more than 75 total slide blocks from Gemini.
+                  {gatekeeperMode === "slide-limit" 
+                    ? "You only need this guide if today's sermon contains more than 75 total slide blocks from Gemini."
+                    : "You only need this guide if the PDF didn't render correctly or if the text shrunk and is too small to view."
+                  }
                 </p>
               </div>
 
