@@ -175,7 +175,7 @@ const workflowTabs: WorkflowTab[] = [
               },
               { 
                 id: "vt-p2-s2", 
-                title: "Click Continue, switch layout to Freeform with 'Don't Add Images', and paste our copied additional instructions into the box on the right.",
+                title: "Click Continue, switch layout to Freeform with 'Don't Add Images', and wallpaper paste our copied additional instructions into the box on the right.",
                 customButton: { label: "Copy Additional Instructions", actionType: "copy", payload: ADDITIONAL_INSTRUCTIONS_PROMPT }
               },
               { id: "vt-p2-s3", title: "Click Generate. Once complete, run a swift visual scroll to confirm no rogue decorative shapes or graphic items leaked into the layout." },
@@ -496,16 +496,17 @@ const workflowTabs: WorkflowTab[] = [
           { id: "site-step-1", title: "Copy the new sermon-only YouTube link from your video manager channel." },
           { id: "site-step-2", title: "Open the sermon site editor page and click the three dots icon next to the video container." },
           { id: "site-step-3", title: "Delete the old livestream archive link and paste the new sermon link into the space." },
-          { id: "site-step-4", title: "Click the Publish button in the upper right corner to push the updated page live." },
-          { id: "site-step-5", title: "Open a live public sermon site incognito tab and verify the new video plays flawlessly." }
+          { id: "site-step-4", title: "CRITICAL: Click the check mark icon next to the new link input container to save the Swap configuration edits." },
+          { id: "site-step-5", title: "Click the Publish button in the upper right corner to push the updated page live." },
+          { id: "site-step-6", title: "Open a live public sermon site incognito tab and verify the new video plays flawlessly." }
         ]
       },
     ],
   },
 ];
 
-const STORAGE_KEY = "aholiab-checklist-state-v37";
-const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v37";
+const STORAGE_KEY = "aholiab-checklist-state-v38";
+const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v38";
 const EVANGELISM_KEY = "aholiab-evangelism-toggle";
 const FONT_SIZE_KEY = "aholiab-global-font-size";
 const THEME_KEY = "aholiab-global-theme";
