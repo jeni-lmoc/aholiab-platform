@@ -28,7 +28,8 @@ import {
 const GLOBAL_LINKS = {
   trainingManual: "https://docs.google.com/document/d/1_Bt7oG56msLcRYvy2UqFG4DY8FkXiRbnLQuKi6SQb2U/edit?usp=drive_link",
   managingSlideLimits: "https://docs.google.com/document/d/1_Bt7oG56msLcRYvy2UqFG4DY8FkXiRbnLQuKi6SQb2U/edit?tab=t.ymklsy324605",
-  weeklySermonTracker: "https://lmoc.slack.com/lists/T09C5S0VDK8/F0AT40A4ZDE"
+  weeklySermonTracker: "https://lmoc.slack.com/lists/T09C5S0VDK8/F0AT40A4ZDE",
+  alternateExportOptions: "https://docs.google.com/document/d/1MjkCwoF0lJf-5jIlyzsTo7WIQrcc_gJlbFTtCoHSffE/edit?tab=t.f1e89nk8dsb8"
 };
 
 const MASTER_AI_PROMPT = `Clean and format the attached document into text format for input into Gamma.
@@ -83,6 +84,12 @@ interface SubTask {
   id: string;
   title: string;
   customButton?: {
+    label: string;
+    actionType: "copy" | "link" | "gatekeeper-link";
+    payload: string;
+  };
+  nestedSubTasks?: string[];
+  inlineButtonUnderNested?: {
     label: string;
     actionType: "copy" | "link" | "gatekeeper-link";
     payload: string;
@@ -244,18 +251,23 @@ const workflowTabs: WorkflowTab[] = [
             phaseId: "ag-phase-2",
             phaseName: "Phase 2: Configuration & Generation",
             subTasks: [
-              { id: "ag-p2-s1", title: "Click 'Continue to prompt editor' and match the generation options to these exact settings:" },
-              { id: "ag-p2-s2", title: "[ ] Verify Text Content is set to Condense" },
-              { id: "ag-p2-s3", title: "[ ] Verify Amount of text is set to Minimal" },
-              { id: "ag-p2-s4", title: "[ ] Verify Image Source is set to Don't Add Images" },
-              { id: "ag-p2-s5", title: "[ ] Verify Content Format is set to Freeform" },
-              { id: "ag-p2-s6", title: "[ ] Verify # of cards is set to 5 cards (Gamma will auto-generate a title card)." },
               { 
-                id: "ag-p2-s7", 
+                id: "ag-p2-s1", 
+                title: "Click 'Continue to prompt editor' and match the generation options to these exact settings:",
+                nestedSubTasks: [
+                  "Verify Text Content is set to Condense",
+                  "Verify Amount of text is set to Minimal",
+                  "Verify Image Source is set to Don't Add Images",
+                  "Verify Content Format is set to Freeform",
+                  "Verify # of cards is set to 5 cards (Gamma will auto-generate a title card)."
+                ]
+              },
+              { 
+                id: "ag-p2-s2", 
                 title: "Navigate to the Additional Instructions text box on the far right and paste our official Afterglow prompt.",
                 customButton: { label: "📋 Copy Afterglow Prompt", actionType: "copy", payload: AFTERGLOW_STUDY_PROMPT }
               },
-              { id: "ag-p2-s8", title: "Click Generate to cast your foundational discussion guide layout." }
+              { id: "ag-p2-s3", title: "Click Generate to cast your foundational discussion guide layout." }
             ]
           },
           {
@@ -277,17 +289,18 @@ const workflowTabs: WorkflowTab[] = [
               { 
                 id: "ag-p4-s3", 
                 title: "Click 'Share' on the top menu bar, select 'Export' on the left menu, and click 'Export to PDF'. Open the file to verify text sizing. (If text shrinkage occurred, click the troubleshooting button below to open the Google Slides workaround).",
-                customButton: { label: "⚠️ Alternate Export Options Guide", actionType: "gatekeeper-link", payload: GLOBAL_LINKS.trainingManual }
+                customButton: { label: "⚠️ Alternate Export Options Guide", actionType: "gatekeeper-link", payload: GLOBAL_LINKS.alternateExportOptions }
               },
               { id: "ag-p4-s4", title: "Re-open that same 'Share' menu and copy your secure view-only link to your clipboard so it is the most recent item copied." },
-              { id: "ag-p4-s5", title: "Complete your sermon tracker housekeeping log to finish the weekly loop:" },
-              { id: "ag-p4-s6", title: "[ ] Paste your view-only Gamma Link into the proper row track." },
-              { id: "ag-p4-s7", title: "[ ] Upload your downloaded Study Guide PDF file directly into the AGS PDF column." },
-              { id: "ag-p4-s8", title: "[ ] Click the checkbox to mark the AGS Ready milestone as complete." },
               { 
-                id: "ag-p4-s9", 
-                title: "Launch your church master database tracker to apply your copied clip assets:",
-                customButton: { label: "💬 Open Weekly Sermon Tracker", actionType: "link", payload: GLOBAL_LINKS.weeklySermonTracker }
+                id: "ag-p4-s5", 
+                title: "Complete your sermon tracker housekeeping log to finish the weekly loop:",
+                nestedSubTasks: [
+                  "Paste your view-only Gamma Link into the proper row track.",
+                  "Upload your downloaded Study Guide PDF file directly into the AGS PDF column.",
+                  "Click the checkbox to mark the AGS Ready milestone as complete."
+                ],
+                inlineButtonUnderNested: { label: "💬 Open Weekly Sermon Tracker", actionType: "link", payload: GLOBAL_LINKS.weeklySermonTracker }
               }
             ]
           }
@@ -320,8 +333,8 @@ const workflowTabs: WorkflowTab[] = [
   },
 ];
 
-const STORAGE_KEY = "aholiab-checklist-state-v26";
-const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v26";
+const STORAGE_KEY = "aholiab-checklist-state-v27";
+const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v27";
 const EVANGELISM_KEY = "aholiab-evangelism-toggle";
 const FONT_SIZE_KEY = "aholiab-global-font-size";
 const THEME_KEY = "aholiab-global-theme";
@@ -411,7 +424,14 @@ export function SermonChecklist() {
 
     const subUpdates: Record<string, boolean> = {};
     if (item.progressivePhases) {
-      item.progressivePhases.flatMap(p => p.subTasks).forEach(sub => { subUpdates[sub.id] = checked; });
+      item.progressivePhases.flatMap(p => p.subTasks).forEach(sub => { 
+        subUpdates[sub.id] = checked; 
+        if (sub.nestedSubTasks) {
+          sub.nestedSubTasks.forEach((_, idx) => {
+            subUpdates[`${sub.id}-nest-${idx}`] = checked;
+          });
+        }
+      });
     } else if (item.subTasks) {
       item.subTasks.forEach(sub => { subUpdates[sub.id] = checked; });
     }
@@ -430,7 +450,51 @@ export function SermonChecklist() {
       : (item.subTasks || []);
 
     if (allSubTasks.length > 0) {
-      const allChecked = allSubTasks.every(sub => updatedSubItems[sub.id]);
+      const allChecked = allSubTasks.every(sub => {
+        if (sub.nestedSubTasks) {
+          return sub.nestedSubTasks.every((_, idx) => updatedSubItems[`${sub.id}-nest-${idx}`]);
+        }
+        return updatedSubItems[sub.id];
+      });
+      setCheckedItems(prev => ({ ...prev, [parentId]: allChecked }));
+    }
+  };
+
+  const handleNestedSubCheck = (parentId: string, mainSubId: string, nestIdx: number, checked: boolean) => {
+    const nestKey = `${mainSubId}-nest-${nestIdx}`;
+    const updatedSubItems = { ...checkedSubItems, [nestKey]: checked };
+    
+    const item = workflowTabs.flatMap(t => t.items).find(i => i.id === parentId);
+    if (!item) return;
+
+    const mainSubTask = item.progressivePhases?.flatMap(p => p.subTasks).find(s => s.id === mainSubId);
+    if (mainSubTask && mainSubTask.nestedSubTasks) {
+      const allNestedChecked = mainSubTask.nestedSubTasks.every((_, idx) => {
+        if (idx === nestIdx) return checked;
+        return checkedSubItems[`${mainSubId}-nest-${idx}`];
+      });
+      updatedSubItems[mainSubId] = allNestedChecked;
+    }
+
+    setCheckedSubItems(updatedSubItems);
+
+    const allSubTasks = item.progressivePhases 
+      ? item.progressivePhases.flatMap(p => p.subTasks) 
+      : [];
+
+    if (allSubTasks.length > 0) {
+      const allChecked = allSubTasks.every(sub => {
+        if (sub.id === mainSubId) {
+          return mainSubTask?.nestedSubTasks?.every((_, idx) => {
+            if (idx === nestIdx) return checked;
+            return checkedSubItems[`${mainSubId}-nest-${idx}`];
+          });
+        }
+        if (sub.nestedSubTasks) {
+          return sub.nestedSubTasks.every((_, idx) => checkedSubItems[`${sub.id}-nest-${idx}`]);
+        }
+        return checkedSubItems[sub.id];
+      });
       setCheckedItems(prev => ({ ...prev, [parentId]: allChecked }));
     }
   };
@@ -468,8 +532,23 @@ export function SermonChecklist() {
       : (item.subTasks || []);
 
     if (allSubTasks.length === 0) return { completed: 0, total: 0, percentage: 0 };
-    const completed = allSubTasks.filter(sub => checkedSubItems[sub.id]).length;
-    return { completed, total: allSubTasks.length, percentage: Math.round((completed / allSubTasks.length) * 100) };
+    
+    let completed = 0;
+    let total = 0;
+
+    allSubTasks.forEach(sub => {
+      if (sub.nestedSubTasks) {
+        sub.nestedSubTasks.forEach((_, idx) => {
+          total++;
+          if (checkedSubItems[`${sub.id}-nest-${idx}`]) completed++;
+        });
+      } else {
+        total++;
+        if (checkedSubItems[sub.id]) completed++;
+      }
+    });
+
+    return { completed, total, percentage: total > 0 ? Math.round((completed / total) * 100) : 0 };
   };
 
   const getTabProgress = (tab: WorkflowTab) => {
@@ -951,15 +1030,55 @@ export function SermonChecklist() {
                                                 <div className="pt-0.5 shrink-0">
                                                   <Checkbox
                                                     id={sub.id}
+                                                    disabled={!!sub.nestedSubTasks}
                                                     checked={checkedSubItems[sub.id] || false}
                                                     onCheckedChange={(c) => handleSubCheck(item.id, sub.id, c === true)}
-                                                    className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:border-sky-400"
+                                                    className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:border-sky-400 disabled:opacity-50"
                                                   />
                                                 </div>
                                                 <div className="leading-relaxed flex-1">
                                                   {sub.title}
                                                 </div>
                                               </label>
+
+                                              {/* HIGHLY OPTIMIZED INDENTED NESTED BULLET TRACKER ENGINE */}
+                                              {sub.nestedSubTasks && (
+                                                <div className="pl-7 mt-2 space-y-2 border-l border-slate-800/60 ml-2">
+                                                  {sub.nestedSubTasks.map((nestTitle, nestIdx) => (
+                                                    <label 
+                                                      key={nestIdx} 
+                                                      className={`flex items-start gap-3 cursor-pointer select-none ${fontStyles.subTaskTitle} ${
+                                                        checkedSubItems[`${sub.id}-nest-${nestIdx}`] ? "line-through text-slate-500 opacity-60" : "text-slate-300"
+                                                      }`}
+                                                    >
+                                                      <div className="pt-0.5 shrink-0">
+                                                        <Checkbox
+                                                          id={`${sub.id}-nest-${nestIdx}`}
+                                                          checked={checkedSubItems[`${sub.id}-nest-${nestIdx}`] || false}
+                                                          onCheckedChange={(c) => handleNestedSubCheck(item.id, sub.id, nestIdx, c === true)}
+                                                          className="w-3.5 h-3.5 rounded border-slate-600 data-[state=checked]:bg-sky-500 data-[state=checked]:border-sky-500"
+                                                        />
+                                                      </div>
+                                                      <div className="leading-normal flex-1">
+                                                        {nestTitle}
+                                                      </div>
+                                                    </label>
+                                                  ))}
+                                                </div>
+                                              )}
+
+                                              {sub.inlineButtonUnderNested && (
+                                                <div className="pl-7 mt-3">
+                                                  <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => handleActionClick(sub.inlineButtonUnderNested, sub.id)}
+                                                    className={`rounded uppercase tracking-wider border-sky-500/20 text-sky-400 bg-sky-500/[0.02] hover:bg-sky-500/10 hover:text-sky-300 transition-all ${fontStyles.subTaskBtn}`}
+                                                  >
+                                                    <ExternalLink className="h-3 w-3 mr-1.5 shrink-0" /> {sub.inlineButtonUnderNested.label}
+                                                  </Button>
+                                                </div>
+                                              )}
 
                                               {sub.customButton && (
                                                 <div className="pl-7.5 mt-2.5">
