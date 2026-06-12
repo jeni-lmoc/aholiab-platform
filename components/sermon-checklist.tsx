@@ -77,6 +77,8 @@ const ADDITIONAL_INSTRUCTIONS_PROMPT = `DO NOT Summarize, rephrase, or add sub-t
 
 const AFTERGLOW_STUDY_PROMPT = `Create a discussion group study that includes one deep dive thought provoking question per slide. Make the questions conversational. Do not use obvious or surface level questions. Create one title slide, 3 slides with a discussion question at the bottom of each slide, and 1 final slide with a reflection question and a call to action. DO NOT use Arrows, Stats, Circle stats, Pyramid, Funnel, Cycle, Circle, Ring, Semi-circle, and Flower to illustrate card content. Sparingly use Images or icons with text, Timeline, Bullets, Bar stats, Steps, and Staircase.`;
 
+const EXTENDED_6DAY_PROMPT = `Create a 6 Day prayer plan and daily journaling prompts, prayer prompts and a deep dive discussion question. Do not use obvious or surface level questions. DO NOT use Arrows, Stats, Circle stats, Pyramid, Funnel, Cycle, Circle, Ring, Semi-circle, and Flower to illustrate card content. Sparingly use Images or icons with text, Timeline, Bullets, Bar stats, Steps, and Staircase. Put 1 Call to action, 1 journaling prompt, 1 deep dive question and 1 prayer on each page.`;
+
 // ==========================================
 // TYPE DEFINITIONS & DATA ARCHITECTURE
 // ==========================================
@@ -306,7 +308,79 @@ const workflowTabs: WorkflowTab[] = [
           }
         ]
       },
-      { id: "extended-study", title: "6-Day Extended Study Guide", description: "Create the extended study materials for the week." },
+      { 
+        id: "extended-study", 
+        title: "6-Day Extended Study Guide", 
+        description: "Create the extended daily prayer tracking and devotional journaling materials.",
+        progressivePhases: [
+          {
+            phaseId: "ex-phase-1",
+            phaseName: "Phase 1: Intake & Gamma Setup",
+            subTasks: [
+              { id: "ex-p1-s1", title: "Locate the Pastor's master Word document or copy the cleaned text outline straight from your Gemini container." },
+              { id: "ex-p1-s2", title: "Open Gamma, ensure you are in the Pastor's workspace, click '+ Create New AI', and select 'Paste in Text'." },
+              { id: "ex-p1-s3", title: "Paste your sermon content into the text window. Set the top creation type to Presentation, lock the formatting dropdown to Traditional, and under the destination objective question, check 'Summarize long text or document'." }
+            ]
+          },
+          {
+            phaseId: "ex-phase-2",
+            phaseName: "Phase 2: Configuration & Generation",
+            subTasks: [
+              { 
+                id: "ex-p2-s1", 
+                title: "Click 'Continue to prompt editor' and match the generation options to these exact settings:",
+                nestedSubTasks: [
+                  "Verify Text Content is set to Condense",
+                  "Verify Amount of text is set to Concise",
+                  "Verify Image Source is set to Don't Add Images",
+                  "Verify Content Format is set to Freeform",
+                  "Verify # of cards is set to 7 cards track."
+                ]
+              },
+              { 
+                id: "ex-p2-s2", 
+                title: "Navigate to the Additional Instructions text box on the far right and paste our official 6-Day Extended prompt.",
+                customButton: { label: "📋 Copy 6-Day Extended Prompt", actionType: "copy", payload: EXTENDED_6DAY_PROMPT }
+              },
+              { id: "ex-p2-s3", title: "Click Generate." }
+            ]
+          },
+          {
+            phaseId: "ex-phase-3",
+            phaseName: "Phase 3: Visual Polish & Title Work",
+            subTasks: [
+              { id: "ex-p3-s1", title: "Format the Cover Slide layout: Add '6-Day Extended Study:' as a separate H2 header line right before the sermon title, scale the main title to H1, delete the speaker's name, and scrub any remaining extra text." },
+              { id: "ex-p3-s2", title: "Look at the upper-left file name header beside the Gamma icon. Click on the title string and manually type '6-Day Extended Study: ' directly before the sermon title to ensure the global file name matches." },
+              { id: "ex-p3-s3", title: "Select an accent image from the theme that aligns with the weekly sermon theme or title and drop it onto this cover slide as your study graphic." },
+              { id: "ex-p3-s4", title: "Open Page Setup (3 dots icon) and configure global styles: Change Base font size to L (Large), turn ON card backdrops, go to headers & footers, add the Theme logo to the lower right corner at S (Small) size, and lock it to 'Hide on first card'." }
+            ]
+          },
+          {
+            phaseId: "ex-phase-4",
+            phaseName: "Phase 4: Content Cleanup & Sermon Tracker Logging",
+            subTasks: [
+              { id: "ex-p4-s1", title: "Manually audit the content cards: Ensure all Bible book names are completely uniform, and replace all long dashes (—) with proper punctuations." },
+              { id: "ex-p4-s2", title: "Navigate to the Current Sabbath folder, open up the Social Media slide deck, and copy the third slide in that deck (the Phototheology card). Paste it as the absolute final card in this slide deck." },
+              { 
+                id: "ex-p4-s3", 
+                title: "Click 'Share' on the top menu bar, select 'Export' on the left menu, and click 'Export to PDF'. Open the file to verify text sizing. (If text shrinkage occurred, click the troubleshooting button below to open the Google Slides workaround).",
+                customButton: { label: "⚠️ Alternate Export Options Guide", actionType: "gatekeeper-link", payload: GLOBAL_LINKS.alternateExportOptions }
+              },
+              { id: "ex-p4-s4", title: "Re-open that same 'Share' menu and copy your secure view-only link to your clipboard so it is the most recent item copied." },
+              { 
+                id: "ex-p4-s5", 
+                title: "Complete your sermon tracker housekeeping log to finish the weekly loop:",
+                nestedSubTasks: [
+                  "Paste your view-only Gamma Link into the proper row track.",
+                  "Upload your downloaded Study Guide PDF file directly into the ExS PDF column.",
+                  "Click the checkbox to mark the ExS Ready milestone as complete."
+                ],
+                inlineButtonUnderNested: { label: "💬 Open Weekly Sermon Tracker", actionType: "link", payload: GLOBAL_LINKS.weeklySermonTracker }
+              }
+            ]
+          }
+        ]
+      },
       { id: "qr-code", title: "QR Code Update", description: "Create PDFs, combine them, compress to under 20MB, upload, and save." },
       { id: "website", title: "Sites", description: "Upload the sermon video link, the main slide deck, the study guides, and the combined PDF to the site." },
     ],
@@ -333,8 +407,8 @@ const workflowTabs: WorkflowTab[] = [
   },
 ];
 
-const STORAGE_KEY = "aholiab-checklist-state-v27";
-const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v27";
+const STORAGE_KEY = "aholiab-checklist-state-v28";
+const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v28";
 const EVANGELISM_KEY = "aholiab-evangelism-toggle";
 const FONT_SIZE_KEY = "aholiab-global-font-size";
 const THEME_KEY = "aholiab-global-theme";
@@ -892,7 +966,8 @@ export function SermonChecklist() {
 
           {workflowTabs.map((tab) => {
             const progress = getTabProgress(tab);
-            const visibleItems = tab.items.filter(item => !(isEvangelismSabbath && item.isAfterglowRelated));
+            const visibleItems = tab.items.filter(item => !(isEvangelismSabbMode && item.isAfterglowRelated));
+            const isEvangelismSabbMode = isEvangelismSabbath;
             return (
               <TabsContent key={tab.id} value={tab.id} className="focus:outline-none">
                 
@@ -1030,10 +1105,9 @@ export function SermonChecklist() {
                                                 <div className="pt-0.5 shrink-0">
                                                   <Checkbox
                                                     id={sub.id}
-                                                    disabled={!!sub.nestedSubTasks}
                                                     checked={checkedSubItems[sub.id] || false}
                                                     onCheckedChange={(c) => handleSubCheck(item.id, sub.id, c === true)}
-                                                    className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:border-sky-400 disabled:opacity-50"
+                                                    className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:border-sky-400"
                                                   />
                                                 </div>
                                                 <div className="leading-relaxed flex-1">
@@ -1041,7 +1115,7 @@ export function SermonChecklist() {
                                                 </div>
                                               </label>
 
-                                              {/* HIGHLY OPTIMIZED INDENTED NESTED BULLET TRACKER ENGINE */}
+                                              {/* HIGHLY OPTIMIZED FLEXIBLE INDENTED NESTED BULLET TRACKER ENGINE */}
                                               {sub.nestedSubTasks && (
                                                 <div className="pl-7 mt-2 space-y-2 border-l border-slate-800/60 ml-2">
                                                   {sub.nestedSubTasks.map((nestTitle, nestIdx) => (
@@ -1056,7 +1130,7 @@ export function SermonChecklist() {
                                                           id={`${sub.id}-nest-${nestIdx}`}
                                                           checked={checkedSubItems[`${sub.id}-nest-${nestIdx}`] || false}
                                                           onCheckedChange={(c) => handleNestedSubCheck(item.id, sub.id, nestIdx, c === true)}
-                                                          className="w-3.5 h-3.5 rounded border-slate-600 data-[state=checked]:bg-sky-500 data-[state=checked]:border-sky-500"
+                                                          className="w-3.5 h-3.5 rounded border-slate-600 data-[state=checked]:bg-sky-500 data-[state=checked]:bg-sky-500"
                                                         />
                                                       </div>
                                                       <div className="leading-normal flex-1">
@@ -1131,7 +1205,7 @@ export function SermonChecklist() {
                                           id={sub.id}
                                           checked={checkedSubItems[sub.id] || false}
                                           onCheckedChange={(c) => handleSubCheck(item.id, sub.id, c === true)}
-                                          className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:border-sky-400"
+                                          className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:bg-sky-400"
                                         />
                                       </div>
                                       <div className="leading-relaxed">
