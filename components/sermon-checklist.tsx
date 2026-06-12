@@ -729,8 +729,7 @@ export function SermonChecklist() {
   };
 
   const getTabProgress = (tab: WorkflowTab) => {
-    const isEvangelismSabbMode = isEvangelismSabbath;
-    const visibleItems = tab.items.filter(item => !(isEvangelismSabbMode && item.isAfterglowRelated));
+    const visibleItems = tab.items.filter(item => !(isEvangelismSabbath && item.isAfterglowRelated));
     const completedCount = visibleItems.filter(item => checkedItems[item.id]).length;
     return { completed: completedCount, total: visibleItems.length, percentage: visibleItems.length > 0 ? Math.round((completedCount / visibleItems.length) * 100) : 0 };
   };
@@ -738,8 +737,7 @@ export function SermonChecklist() {
   const getMasterProgress = () => {
     let completed = 0, total = 0;
     workflowTabs.forEach((tab) => {
-      const isEvangelismSabbMode = isEvangelismSabbath;
-      const visible = tab.items.filter(item => !(isEvangelismSabbMode && item.isAfterglowRelated));
+      const visible = tab.items.filter(item => !(isEvangelismSabbath && item.isAfterglowRelated));
       total += visible.length;
       completed += visible.filter(item => checkedItems[item.id]).length;
     });
@@ -956,7 +954,7 @@ export function SermonChecklist() {
 
         <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl border backdrop-blur-xl transition-all duration-300 ${themeStyles.cardBg}`}>
           <div className="flex items-center gap-4">
-             <Switch id="evangelism-mode" checked={isEvangelismSabbAccess} onCheckedChange={setIsEvangelismSabbath} className={`scale-110 ${themeStyles.toggleColor}`} />
+             <Switch id="evangelism-mode" checked={isEvangelismSabbath} onCheckedChange={setIsEvangelismSabbath} className={`scale-110 ${themeStyles.toggleColor}`} />
              <Label htmlFor="evangelism-mode" className={`${fontStyles.toggleText} font-bold cursor-pointer select-none`}>Evangelism Sabbath Mode</Label>
           </div>
           <Button variant="outline" onClick={handleReset} className={`${fontStyles.btnText} h-9 px-4 font-black uppercase tracking-widest rounded-xl transition-all ${themeStyles.btnUnselected}`}>
@@ -1066,9 +1064,8 @@ export function SermonChecklist() {
           </TabsList>
 
           {workflowTabs.map((tab) => {
-            const isEvangelismSabbAccess = isEvangelismSabbath;
             const progress = getTabProgress(tab);
-            const visibleItems = tab.items.filter(item => !(isEvangelismSabbAccess && item.isAfterglowRelated));
+            const visibleItems = tab.items.filter(item => !(isEvangelismSabbath && item.isAfterglowRelated));
             return (
               <TabsContent key={tab.id} value={tab.id} className="focus:outline-none">
                 
@@ -1306,7 +1303,7 @@ export function SermonChecklist() {
                                           id={sub.id}
                                           checked={checkedSubItems[sub.id] || false}
                                           onCheckedChange={(c) => handleSubCheck(item.id, sub.id, c === true)}
-                                          className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:bg-sky-400"
+                                          className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:border-sky-400"
                                         />
                                       </div>
                                       <div className="leading-relaxed">
