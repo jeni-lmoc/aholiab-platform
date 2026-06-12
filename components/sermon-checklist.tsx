@@ -510,8 +510,8 @@ const workflowTabs: WorkflowTab[] = [
   },
 ];
 
-const STORAGE_KEY = "aholiab-checklist-state-v34";
-const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v34";
+const STORAGE_KEY = "aholiab-checklist-state-v35";
+const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v35";
 const EVANGELISM_KEY = "aholiab-evangelism-toggle";
 const FONT_SIZE_KEY = "aholiab-global-font-size";
 const THEME_KEY = "aholiab-global-theme";
@@ -1314,7 +1314,7 @@ export function SermonChecklist() {
                                           id={sub.id}
                                           checked={checkedSubItems[sub.id] || false}
                                           onCheckedChange={(c) => handleSubCheck(item.id, sub.id, c === true)}
-                                          className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:border-sky-400"
+                                          className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:bg-sky-400"
                                         />
                                       </div>
                                       <div className="leading-relaxed">
