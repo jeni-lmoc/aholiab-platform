@@ -511,8 +511,8 @@ const workflowTabs: WorkflowTab[] = [
   },
 ];
 
-const STORAGE_KEY = "aholiab-checklist-state-v42";
-const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v42";
+const STORAGE_KEY = "aholiab-checklist-state-v43";
+const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v43";
 const EVANGELISM_KEY = "aholiab-evangelism-toggle";
 const FONT_SIZE_KEY = "aholiab-global-font-size";
 const THEME_KEY = "aholiab-global-theme";
@@ -710,7 +710,7 @@ export function SermonChecklist() {
           });
         }
         if (sub.nestedSubTasks) {
-          return sub.nestedSubTasks.every((_, idx) => checkedSubItems[`${sub.id}-nest-${idx}`]);
+          return sub.nestedSubTasks.every((_, idx) => updatedSubItems[`${sub.id}-nest-${idx}`]);
         }
         return updatedSubItems[sub.id];
       });
@@ -1006,6 +1006,12 @@ export function SermonChecklist() {
     });
 
     return { completed, total, percentage: total > 0 ? Math.round((completed / total) * 100) : 0 };
+  };
+
+  const getTabProgress = (tab: WorkflowTab) => {
+    const visibleItems = tab.items.filter(item => !(isEvangelismSabbath && item.isAfterglowRelated));
+    const completedCount = visibleItems.filter(item => checkedItems[item.id]).length;
+    return { completed: completedCount, total: visibleItems.length, percentage: visibleItems.length > 0 ? Math.round((completedCount / visibleItems.length) * 100) : 0 };
   };
 
   const getMasterProgress = () => {
@@ -1625,7 +1631,7 @@ export function SermonChecklist() {
 
       {/* ==========================================
           VERTICAL STACKED INTERSTITIAL MODAL 
-         ========================================== */}
+         ========================================= */}
       {isGatekeeperOpen && (
         <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${themeStyles.modalOverlay}`}>
           <Card className={`w-full max-w-sm p-6 rounded-2xl shadow-2xl animate-in fade-in zoom-in-95 duration-200 ${themeStyles.modalContent}`}>
