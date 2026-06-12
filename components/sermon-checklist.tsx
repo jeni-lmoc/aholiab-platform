@@ -492,26 +492,20 @@ const workflowTabs: WorkflowTab[] = [
         id: "youtube-swap", 
         title: "Site Update", 
         description: "Replace the live stream archive container with the finalized, edited sermon-only YouTube video link (typically 1-2 days post-service).",
-        progressivePhases: [
-          {
-            phaseId: "site-phase-1",
-            phaseName: "Phase 1: Sermon-Only YouTube File Replacement Track",
-            subTasks: [
-              { id: "site-p1-s1", title: "Copy the new sermon-only YouTube link from your video manager channel." },
-              { id: "site-p1-s2", title: "Open the sermon site editor page and click the three dots icon next to the video container." },
-              { id: "site-p1-s3", title: "Delete the old livestream archive link and paste the new sermon link into the space." },
-              { id: "site-p1-s4", title: "Click the Publish button in the upper right corner to push the updated page live." },
-              { id: "site-p1-s5", title: "Open a live public sermon site incognito tab and verify the new video plays flawlessly." }
-            ]
-          }
+        subTasks: [
+          { id: "site-step-1", title: "Copy the new sermon-only YouTube link from your video manager channel." },
+          { id: "site-step-2", title: "Open the sermon site editor page and click the three dots icon next to the video container." },
+          { id: "site-step-3", title: "Delete the old livestream archive link and paste the new sermon link into the space." },
+          { id: "site-step-4", title: "Click the Publish button in the upper right corner to push the updated page live." },
+          { id: "site-step-5", title: "Open a live public sermon site incognito tab and verify the new video plays flawlessly." }
         ]
       },
     ],
   },
 ];
 
-const STORAGE_KEY = "aholiab-checklist-state-v36";
-const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v36";
+const STORAGE_KEY = "aholiab-checklist-state-v37";
+const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v37";
 const EVANGELISM_KEY = "aholiab-evangelism-toggle";
 const FONT_SIZE_KEY = "aholiab-global-font-size";
 const THEME_KEY = "aholiab-global-theme";
@@ -911,8 +905,6 @@ export function SermonChecklist() {
       cardHeader: "text-xl font-black",
       taskTitle: "text-xl md:text-2xl font-black",
       taskDesc: "text-base md:text-lg font-semibold",
-      footerScripture: "text-3xl font-black leading-relaxed",
-      footerRef: "text-base font-black tracking-widest",
       phaseHeader: "text-sm font-black tracking-[0.2em]",
       subTaskTitle: "text-base md:text-lg font-bold leading-normal",
       subTaskBtn: "text-xs h-9 px-4 font-black"
@@ -964,7 +956,7 @@ export function SermonChecklist() {
 
         <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl border backdrop-blur-xl transition-all duration-300 ${themeStyles.cardBg}`}>
           <div className="flex items-center gap-4">
-             <Switch id="evangelism-mode" checked={isEvangelismSabbath} onCheckedChange={setIsEvangelismSabbath} className={`scale-110 ${themeStyles.toggleColor}`} />
+             <Switch id="evangelism-mode" checked={isEvangelismSabbAccess} onCheckedChange={setIsEvangelismSabbath} className={`scale-110 ${themeStyles.toggleColor}`} />
              <Label htmlFor="evangelism-mode" className={`${fontStyles.toggleText} font-bold cursor-pointer select-none`}>Evangelism Sabbath Mode</Label>
           </div>
           <Button variant="outline" onClick={handleReset} className={`${fontStyles.btnText} h-9 px-4 font-black uppercase tracking-widest rounded-xl transition-all ${themeStyles.btnUnselected}`}>
@@ -1074,9 +1066,9 @@ export function SermonChecklist() {
           </TabsList>
 
           {workflowTabs.map((tab) => {
-            const isEvangelismSabbMode = isEvangelismSabbath;
+            const isEvangelismSabbAccess = isEvangelismSabbath;
             const progress = getTabProgress(tab);
-            const visibleItems = tab.items.filter(item => !(isEvangelismSabbMode && item.isAfterglowRelated));
+            const visibleItems = tab.items.filter(item => !(isEvangelismSabbAccess && item.isAfterglowRelated));
             return (
               <TabsContent key={tab.id} value={tab.id} className="focus:outline-none">
                 
@@ -1314,7 +1306,7 @@ export function SermonChecklist() {
                                           id={sub.id}
                                           checked={checkedSubItems[sub.id] || false}
                                           onCheckedChange={(c) => handleSubCheck(item.id, sub.id, c === true)}
-                                          className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:border-sky-400"
+                                          className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:bg-sky-400"
                                         />
                                       </div>
                                       <div className="leading-relaxed">
