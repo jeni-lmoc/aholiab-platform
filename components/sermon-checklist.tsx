@@ -1011,7 +1011,7 @@ export function SermonChecklist() {
   const getMasterProgress = () => {
     let completed = 0, total = 0;
     workflowTabs.forEach((tab) => {
-      const visible = tab.items.filter(item => !(isEvangelismSabbatMode && item.isAfterglowRelated));
+      const visible = tab.items.filter(item => !(isEvangelismSabbath && item.isAfterglowRelated));
       total += visible.length;
       completed += visible.filter(item => checkedItems[item.id]).length;
     });
@@ -1183,8 +1183,6 @@ export function SermonChecklist() {
     }
   }[fontSize];
 
-  const isEvangelismSabbatMode = isEvangelismSabbath;
-
   return (
     <div className={`min-h-screen transition-all duration-500 overflow-x-hidden ${themeStyles.bg} ${fontStyles.S}`}>
       
@@ -1341,7 +1339,7 @@ export function SermonChecklist() {
 
           {workflowTabs.map((tab) => {
             const progress = getTabProgress(tab);
-            const visibleItems = tab.items.filter(item => !(isEvangelismSabbatMode && item.isAfterglowRelated));
+            const visibleItems = tab.items.filter(item => !(isEvangelismSabbath && item.isAfterglowRelated));
             return (
               <TabsContent key={tab.id} value={tab.id} className="focus:outline-none">
                 
