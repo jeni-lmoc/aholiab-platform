@@ -329,7 +329,7 @@ const workflowTabs: WorkflowTab[] = [
                 title: "Complete your sermon tracker housekeeping log to finish the weekly loop:",
                 nestedSubTasks: [
                   "Paste your view-only Gamma Link into the proper row track.",
-                  "Upload your downloaded Study Guide PDF file directly into the AGS PDF column.",
+                  "Upload your downloaded Study Guide PDF file directly into the calendar AGS PDF column.",
                   "Click the checkbox to mark the AGS Ready milestone as complete."
                 ],
                 inlineButtonUnderNested: { label: "💬 Open Weekly Sermon Tracker", actionType: "link", payload: GLOBAL_LINKS.weeklySermonTracker }
@@ -511,8 +511,8 @@ const workflowTabs: WorkflowTab[] = [
   },
 ];
 
-const STORAGE_KEY = "aholiab-checklist-state-v41";
-const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v41";
+const STORAGE_KEY = "aholiab-checklist-state-v42";
+const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v42";
 const EVANGELISM_KEY = "aholiab-evangelism-toggle";
 const FONT_SIZE_KEY = "aholiab-global-font-size";
 const THEME_KEY = "aholiab-global-theme";
@@ -710,7 +710,7 @@ export function SermonChecklist() {
           });
         }
         if (sub.nestedSubTasks) {
-          return sub.nestedSubTasks.every((_, idx) => updatedSubItems[`${sub.id}-nest-${idx}`]);
+          return sub.nestedSubTasks.every((_, idx) => checkedSubItems[`${sub.id}-nest-${idx}`]);
         }
         return updatedSubItems[sub.id];
       });
@@ -963,16 +963,55 @@ export function SermonChecklist() {
     ];
   };
 
-  const getTabProgress = (tab: WorkflowTab) => {
-    const visibleItems = tab.items.filter(item => !(isEvangelismSabbath && item.isAfterglowRelated));
-    const completedCount = visibleItems.filter(item => checkedItems[item.id]).length;
-    return { completed: completedCount, total: visibleItems.length, percentage: visibleItems.length > 0 ? Math.round((completedCount / visibleItems.length) * 100) : 0 };
+  const getSubProgress = (item: ChecklistItem) => {
+    if (item.hasDynamicEvangelismMapping) {
+      const activePhases = getDynamicWebsitePhases();
+      let completed = 0;
+      let total = 0;
+      activePhases.forEach(phase => {
+        phase.subTasks.forEach(sub => {
+          if (sub.nestedSubTasks) {
+            sub.nestedSubTasks.forEach((_, idx) => {
+              total++;
+              if (checkedSubItems[`${sub.id}-nest-${idx}`]) completed++;
+            });
+          } else {
+            total++;
+            if (checkedSubItems[sub.id]) completed++;
+          }
+        });
+      });
+      return { completed, total, percentage: total > 0 ? Math.round((completed / total) * 100) : 0 };
+    }
+
+    const allSubTasks = item.progressivePhases 
+      ? item.progressivePhases.flatMap(p => p.subTasks) 
+      : (item.subTasks || []);
+
+    if (allSubTasks.length === 0) return { completed: 0, total: 0, percentage: 0 };
+    
+    let completed = 0;
+    let total = 0;
+
+    allSubTasks.forEach(sub => {
+      if (sub.nestedSubTasks) {
+        sub.nestedSubTasks.forEach((_, idx) => {
+          total++;
+          if (checkedSubItems[`${sub.id}-nest-${idx}`]) completed++;
+        });
+      } else {
+        total++;
+        if (checkedSubItems[sub.id]) completed++;
+      }
+    });
+
+    return { completed, total, percentage: total > 0 ? Math.round((completed / total) * 100) : 0 };
   };
 
   const getMasterProgress = () => {
     let completed = 0, total = 0;
     workflowTabs.forEach((tab) => {
-      const visible = tab.items.filter(item => !(isEvangelismSabbath && item.isAfterglowRelated));
+      const visible = tab.items.filter(item => !(isEvangelismSabbatMode && item.isAfterglowRelated));
       total += visible.length;
       completed += visible.filter(item => checkedItems[item.id]).length;
     });
@@ -1144,6 +1183,8 @@ export function SermonChecklist() {
     }
   }[fontSize];
 
+  const isEvangelismSabbatMode = isEvangelismSabbath;
+
   return (
     <div className={`min-h-screen transition-all duration-500 overflow-x-hidden ${themeStyles.bg} ${fontStyles.S}`}>
       
@@ -1300,7 +1341,7 @@ export function SermonChecklist() {
 
           {workflowTabs.map((tab) => {
             const progress = getTabProgress(tab);
-            const visibleItems = tab.items.filter(item => !(isEvangelismSabbath && item.isAfterglowRelated));
+            const visibleItems = tab.items.filter(item => !(isEvangelismSabbatMode && item.isAfterglowRelated));
             return (
               <TabsContent key={tab.id} value={tab.id} className="focus:outline-none">
                 
