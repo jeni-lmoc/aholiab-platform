@@ -310,79 +310,7 @@ const workflowTabs: WorkflowTab[] = [
           }
         ]
       },
-      { 
-        id: "extended-study", 
-        title: "6-Day Extended Study Guide", 
-        description: "Create the extended daily prayer tracking and devotional journaling materials.",
-        progressivePhases: [
-          {
-            phaseId: "ex-phase-1",
-            phaseName: "Phase 1: Intake & Gamma Setup",
-            subTasks: [
-              { id: "ex-p1-s1", title: "Locate the Pastor's master Word document or copy the cleaned text outline straight from your Gemini container." },
-              { id: "ex-p1-s2", title: "Open Gamma, ensure you are in the Pastor's workspace, click '+ Create New AI', and select 'Paste in Text'." },
-              { id: "ex-p1-s3", title: "Paste your sermon content into the text window. Set the top creation type to Presentation, lock the formatting dropdown to Traditional, and under the destination objective question, check 'Summarize long text or document'." }
-            ]
-          },
-          {
-            phaseId: "ex-phase-2",
-            phaseName: "Phase 2: Configuration & Generation",
-            subTasks: [
-              { 
-                id: "ex-p2-s1", 
-                title: "Click 'Continue to prompt editor' and match the generation options to these exact settings:",
-                nestedSubTasks: [
-                  "Verify Text Content is set to Condense",
-                  "Verify Amount of text is set to Concise",
-                  "Verify Image Source is set to Don't Add Images",
-                  "Verify Content Format is set to Freeform",
-                  "Verify # of cards is set to 7 cards total."
-                ]
-              },
-              { 
-                id: "ex-p2-s2", 
-                title: "Navigate to the Additional Instructions text box on the far right and paste our official 6-Day Extended prompt.",
-                customButton: { label: "📋 Copy 6-Day Extended Prompt", actionType: "copy", payload: EXTENDED_6DAY_PROMPT }
-              },
-              { id: "ex-p2-s3", title: "Click Generate." }
-            ]
-          },
-          {
-            phaseId: "ex-phase-3",
-            phaseName: "Phase 3: Visual Polish & Title Work",
-            subTasks: [
-              { id: "ex-p3-s1", title: "Format the Cover Slide layout: Add '6-Day Extended Study:' as a separate H2 header line right before the sermon title, scale the main title to H1, delete the speaker's name, and scrub any remaining extra text." },
-              { id: "ex-p3-s2", title: "Look at the upper-left file name header beside the Gamma icon. Click on the title string and manually type '6-Day Extended Study: ' directly before the sermon title to ensure the global file name matches." },
-              { id: "ex-p3-s3", title: "Select an accent image from the theme that aligns with the weekly sermon theme or title and drop it onto this cover slide as your study graphic." },
-              { id: "ex-p3-s4", title: "Open Page Setup (3 dots icon) and configure global styles: Change Base font size to L (Large), turn ON card backdrops, go to headers & footers, add the Theme logo to the lower right corner at S (Small) size, and lock it to 'Hide on first card'." }
-            ]
-          },
-          {
-            phaseId: "ex-phase-4",
-            phaseName: "Phase 4: Content Cleanup & Sermon Tracker Logging",
-            subTasks: [
-              { id: "ex-p4-s1", title: "Manually audit the content cards: Ensure all Bible book names are completely uniform, and replace all long dashes (—) with proper punctuations." },
-              { id: "ex-p4-s2", title: "Navigate to the Current Sabbath folder, open up the Social Media slide deck, and copy the third slide in that deck (the Phototheology card). Paste it as the absolute final card in this slide deck." },
-              { 
-                id: "ex-p4-s3", 
-                title: "Click 'Share' on the top menu bar, select 'Export' on the left menu, and click 'Export to PDF'. Open the file to verify text sizing. (If text shrinkage occurred, click the troubleshooting button below to open the Google Slides workaround).",
-                customButton: { label: "⚠️ Alternate Export Options Guide", actionType: "gatekeeper-export-link", payload: GLOBAL_LINKS.alternateExportOptions }
-              },
-              { id: "ex-p4-s4", title: "Re-open that same 'Share' menu and copy your secure view-only link to your clipboard so it is the most recent item copied." },
-              { 
-                id: "ex-p4-s5", 
-                title: "Complete your sermon tracker housekeeping log to finish the weekly loop:",
-                nestedSubTasks: [
-                  "Paste your view-only Gamma Link into the proper row track.",
-                  "Upload your downloaded Study Guide PDF file directly into the ExS PDF column.",
-                  "Click the checkbox to mark the ExS Ready milestone as complete."
-                ],
-                inlineButtonUnderNested: { label: "💬 Open Weekly Sermon Tracker", actionType: "link", payload: GLOBAL_LINKS.weeklySermonTracker }
-              }
-            ]
-          }
-        ]
-      },
+      { id: "extended-study", title: "6-Day Extended Study Guide", description: "Create the extended daily prayer tracking and devotional journaling materials." },
       { 
         id: "qr-code", 
         title: "QR Code Update", 
@@ -467,8 +395,8 @@ const workflowTabs: WorkflowTab[] = [
   },
 ];
 
-const STORAGE_KEY = "aholiab-checklist-state-v31";
-const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v31";
+const STORAGE_KEY = "aholiab-checklist-state-v32";
+const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v32";
 const EVANGELISM_KEY = "aholiab-evangelism-toggle";
 const FONT_SIZE_KEY = "aholiab-global-font-size";
 const THEME_KEY = "aholiab-global-theme";
@@ -799,7 +727,7 @@ export function SermonChecklist() {
       taskItemChecked: "bg-slate-100/60 border-transparent opacity-40",
       taskText: "text-slate-800",
       taskDesc: "text-slate-700 font-bold",
-      checkboxBorder: "border-slate-400 group-hover/item:border-blue-500 data-[state=checked]:bg-blue-600 data-[state=checked]:bg-blue-600",
+      checkboxBorder: "border-slate-400 group-hover/item:border-blue-500 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600",
       footerBox: "border-slate-300 shadow-inner bg-white/60 text-slate-600",
       footerScripture: "italic font-serif tracking-wide leading-relaxed text-slate-600",
       footerRef: "text-slate-500",
@@ -1325,7 +1253,7 @@ export function SermonChecklist() {
                 <p className="text-xs opacity-70 font-medium leading-relaxed">
                   {gatekeeperMode === "slide-limit" 
                     ? "You only need this guide if today's sermon contains more than 75 total slide blocks from Gemini."
-                    : "You only need this guide if the PDF didn't render correctly or if the text shrunk and is too small to view."[cite: 2]
+                    : "You only need this guide if the PDF didn't render correctly or if the text shrunk and is too small to view."
                   }
                 </p>
               </div>
