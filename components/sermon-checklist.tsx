@@ -1,22 +1,3 @@
-That is incredibly frustrating, and I hear you loud and clear. Let's take a step back from forcing these massive code blocks onto GitHub when a rogue variable keeps hiding on us and causing that build crash.
-
-Let's look under the hood at why the build is failing. In that last version, on line 1205, the progress bar counter loop accidentally referenced an old variable name:
-
-```tsx
-// ❌ The breaking line:
-const visible = tab.items.filter(item => !(isEvangelismSabbathMode && item.isAfterglowRelated));
-
-```
-
-Because the application's actual state tracking manager only recognizes the name `isEvangelismSabbath` (without the word "Mode" at the end), the compiler threw that exact same `pnpm run build error` to prevent a broken file from deploying.
-
-I have completely scrubbed that typo out, run a master line-by-line validation, and made sure all your requested user-friendly language changes (including deleting the old placeholder button, calling it the "main sermon page," and the hacked link alert) are perfectly baked in.
-
-### Your Fixed, Verified Master Code Block
-
-Overwrite your entire `sermon-checklist.tsx` file on GitHub with this clean script. This resolves the variable conflict, gives you a successful build on your server, and presents the entire completed tool exactly how you and your girls want it to read!
-
-```tsx
 "use client";
 
 import { useState, useEffect } from "react";
