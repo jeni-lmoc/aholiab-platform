@@ -74,6 +74,8 @@ Do NOT create a slide deck`;
 
 const ADDITIONAL_INSTRUCTIONS_PROMPT = `DO NOT Summarize, rephrase, or add sub-titles. DO NOT omit any input text or make up new content. All card titles must use heading level 1 (H1), be center-aligned, use the same theme color consistently, and remain consistent across all slides. All body text must use large text size, be center-aligned and remain consistent across all slides. DO NOT use Arrows, Stats, Circle stats, Pyramid, Funnel, Cycle, Circle, Ring, Semi-circle, and Flower to illustrate card content. Sparingly use Images or icons with text, Timeline, Bullets, Bar stats, Steps, and Staircase. No additional comments. Just the verse or the quote on each page. Nothing extra, just the text as provided.`;
 
+const AFTERGLOW_STUDY_PROMPT = `Create a discussion group study that includes one deep dive thought provoking question per slide. Make the questions conversational. Do not use obvious or surface level questions. Create one title slide, 3 slides with a discussion question at the bottom of each slide, and 1 final slide with a reflection question and a call to action. DO NOT use Arrows, Stats, Circle stats, Pyramid, Funnel, Cycle, Circle, Ring, Semi-circle, and Flower to illustrate card content. Sparingly use Images or icons with text, Timeline, Bullets, Bar stats, Steps, and Staircase.`;
+
 // ==========================================
 // TYPE DEFINITIONS & DATA ARCHITECTURE
 // ==========================================
@@ -174,7 +176,7 @@ const workflowTabs: WorkflowTab[] = [
             phaseName: "Phase 3: Finalizing & Hand-off",
             subTasks: [
               { id: "vt-p3-s1", title: "Navigate to Page setup... inside Gamma, change Base font size to L (Large), turn ON Card backdrops, add the Small Theme logo, and choose 'Hide on first and last card'." },
-              { id: "vt-p3-s2", title: "Open the template directory, copy the second card from the Social Media Card deck, and paste it at the very end of your active sermon deck filmstrip." },
+              { id: "vt-p3-s2", title: "Navigate to the Current Sabbath folder, open up the Social Media slide deck, copy the second slide in that deck (Social Media card), and paste it at the very end of your active sermon deck filmstrip." },
               { id: "vt-p3-s3", title: "Click 'Add a Card using AI' at the bottom of the filmstrip and paste the References Index prompt from the training manual. Verify that this generated card perfectly cross-checks with the real scripture used in the deck." },
               { id: "vt-p3-s4", title: "Click Share, set public parameters strictly to 'View' to lock all visual assets, and copy your secure view-only deck link." },
               { 
@@ -223,7 +225,74 @@ const workflowTabs: WorkflowTab[] = [
     sublabel: "Due by the End of Service",
     icon: <BookOpen className="h-4 w-4" />,
     items: [
-      { id: "afterglow-study", title: "Afterglow Study Guide", description: "Create the Afterglow study materials and slides.", isAfterglowRelated: true },
+      { 
+        id: "afterglow-study", 
+        title: "Afterglow Study Guide", 
+        description: "Create the Afterglow study materials and discussion slide deck.", 
+        isAfterglowRelated: true,
+        progressivePhases: [
+          {
+            phaseId: "ag-phase-1",
+            phaseName: "Phase 1: Intake & Gamma Setup",
+            subTasks: [
+              { id: "ag-p1-s1", title: "Locate the Pastor's master Word document (downloaded during Verse Tech Phase 1) or copy the cleaned text outline straight from your Gemini container." },
+              { id: "ag-p1-s2", title: "Open Gamma, ensure you are in the Pastor's workspace (Ivor Myers' workspace), click '+ Create New AI', and select 'Paste in Text'." },
+              { id: "ag-p1-s3", title: "Paste your sermon content into the text window. Set the top creation type to Presentation, lock the formatting dropdown to Traditional, and under the destination objective question, check 'Summarize long text or document'." }
+            ]
+          },
+          {
+            phaseId: "ag-phase-2",
+            phaseName: "Phase 2: Configuration & Generation",
+            subTasks: [
+              { id: "ag-p2-s1", title: "Click 'Continue to prompt editor' and match the generation options to these exact settings:" },
+              { id: "ag-p2-s2", title: "[ ] Verify Text Content is set to Condense" },
+              { id: "ag-p2-s3", title: "[ ] Verify Amount of text is set to Minimal" },
+              { id: "ag-p2-s4", title: "[ ] Verify Image Source is set to Don't Add Images" },
+              { id: "ag-p2-s5", title: "[ ] Verify Content Format is set to Freeform" },
+              { id: "ag-p2-s6", title: "[ ] Verify # of cards is set to 5 cards (Gamma will auto-generate a title card)." },
+              { 
+                id: "ag-p2-s7", 
+                title: "Navigate to the Additional Instructions text box on the far right and paste our official Afterglow prompt.",
+                customButton: { label: "📋 Copy Afterglow Prompt", actionType: "copy", payload: AFTERGLOW_STUDY_PROMPT }
+              },
+              { id: "ag-p2-s8", title: "Click Generate to cast your foundational discussion guide layout." }
+            ]
+          },
+          {
+            phaseId: "ag-phase-3",
+            phaseName: "Phase 3: Visual Polish & Title Work",
+            subTasks: [
+              { id: "ag-p3-s1", title: "Format the Cover Slide layout: Add 'Afterglow:' as a separate H2 header line right before the sermon title, scale the main title to H1, delete the speaker's name, and scrub any remaining extra text." },
+              { id: "ag-p3-s2", title: "Look at the upper-left file name header beside the Gamma icon. Click on the title string and manually type 'Afterglow: ' directly before the sermon title to ensure the global file name matches." },
+              { id: "ag-p3-s3", title: "Select an accent image from the theme that aligns with the weekly sermon theme or title and drop it onto this cover slide as your study graphic." },
+              { id: "ag-p3-s4", title: "Open Page Setup (3 dots icon) and configure global styles: Change Base font size to L (Large), turn ON card backdrops, go to headers & footers, add the Theme logo to the lower right corner at S (Small) size, and lock it to 'Hide on first card'." }
+            ]
+          },
+          {
+            phaseId: "ag-phase-4",
+            phaseName: "Phase 4: Content Cleanup & Sermon Tracker Logging",
+            subTasks: [
+              { id: "ag-p4-s1", title: "Manually audit the content cards: Ensure all Bible book names are completely uniform (all full names or all 3-character shorts), and replace all long dashes (—) with proper punctuations." },
+              { id: "ag-p4-s2", title: "Navigate to the Current Sabbath folder, open up the Social Media slide deck, and copy the third slide in that deck (the Phototheology card). Paste it as the absolute final card in this slide deck." },
+              { 
+                id: "ag-p4-s3", 
+                title: "Click 'Share' on the top menu bar, select 'Export' on the left menu, and click 'Export to PDF'. Open the file to verify text sizing. (If text shrinkage occurred, click the troubleshooting button below to open the Google Slides workaround).",
+                customButton: { label: "⚠️ Alternate Export Options Guide", actionType: "gatekeeper-link", payload: GLOBAL_LINKS.trainingManual }
+              },
+              { id: "ag-p4-s4", title: "Re-open that same 'Share' menu and copy your secure view-only link to your clipboard so it is the most recent item copied." },
+              { id: "ag-p4-s5", title: "Complete your sermon tracker housekeeping log to finish the weekly loop:" },
+              { id: "ag-p4-s6", title: "[ ] Paste your view-only Gamma Link into the proper row track." },
+              { id: "ag-p4-s7", title: "[ ] Upload your downloaded Study Guide PDF file directly into the AGS PDF column." },
+              { id: "ag-p4-s8", title: "[ ] Click the checkbox to mark the AGS Ready milestone as complete." },
+              { 
+                id: "ag-p4-s9", 
+                title: "Launch your church master database tracker to apply your copied clip assets:",
+                customButton: { label: "💬 Open Weekly Sermon Tracker", actionType: "link", payload: GLOBAL_LINKS.weeklySermonTracker }
+              }
+            ]
+          }
+        ]
+      },
       { id: "extended-study", title: "6-Day Extended Study Guide", description: "Create the extended study materials for the week." },
       { id: "qr-code", title: "QR Code Update", description: "Create PDFs, combine them, compress to under 20MB, upload, and save." },
       { id: "website", title: "Sites", description: "Upload the sermon video link, the main slide deck, the study guides, and the combined PDF to the site." },
@@ -251,8 +320,8 @@ const workflowTabs: WorkflowTab[] = [
   },
 ];
 
-const STORAGE_KEY = "aholiab-checklist-state-v25";
-const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v25";
+const STORAGE_KEY = "aholiab-checklist-state-v26";
+const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v26";
 const EVANGELISM_KEY = "aholiab-evangelism-toggle";
 const FONT_SIZE_KEY = "aholiab-global-font-size";
 const THEME_KEY = "aholiab-global-theme";
@@ -884,7 +953,7 @@ export function SermonChecklist() {
                                                     id={sub.id}
                                                     checked={checkedSubItems[sub.id] || false}
                                                     onCheckedChange={(c) => handleSubCheck(item.id, sub.id, c === true)}
-                                                    className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:bg-sky-400"
+                                                    className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:border-sky-400"
                                                   />
                                                 </div>
                                                 <div className="leading-relaxed flex-1">
@@ -943,7 +1012,7 @@ export function SermonChecklist() {
                                           id={sub.id}
                                           checked={checkedSubItems[sub.id] || false}
                                           onCheckedChange={(c) => handleSubCheck(item.id, sub.id, c === true)}
-                                          className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:bg-sky-400"
+                                          className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:border-sky-400"
                                         />
                                       </div>
                                       <div className="leading-relaxed">
