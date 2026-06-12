@@ -237,7 +237,7 @@ const workflowTabs: WorkflowTab[] = [
             phaseId: "b-phase-2",
             phaseName: "Phase 2: Visual Enhancements & Audit",
             subTasks: [
-              { id: "b-p2-s1", title: "Locate cards where a verse is extremely brief. Add aesthetic interest by embedding an image at the top or applying an entire background graphic container, keeping text highly readable." },
+              { id: "b-p2-s1", title: "Locate cards where a verse is extremely brief. Add aesthetic interest by embedding an image at the top or applying an entire background background graphic container, keeping text highly readable." },
               { id: "b-p2-s2", title: "Audit the full thumbnail timeline track. Ensure a balanced pacing of elements across the presentation, avoiding image clustering (e.g., three image slides stacked together followed by ten blank ones)." },
               { id: "b-p2-s3", title: "Verify that zero transitions or element motion animations have been added anywhere in the presentation—all slides must remain static for stable broadcast production." },
               { id: "b-p2-s4", title: "Confirm that every added visual asset strictly aligns with the spiritual context of the specific passage and honors the core custom theme palette." }
@@ -492,16 +492,16 @@ const workflowTabs: WorkflowTab[] = [
         id: "youtube-swap", 
         title: "Site Update", 
         description: "Replace the live stream archive container with the finalized, edited sermon-only YouTube video link (typically 1-2 days post-service).",
-        subTasks: [
-          { 
-            id: "site-sub-main-loop", 
-            title: "Process the sermon-only media file replacement track inside your cloud site console editor:",
-            nestedSubTasks: [
-              "Copy the new sermon-only YouTube link from your video manager channel.",
-              "Open the sermon site editor page and click the three dots icon next to the video container.",
-              "Delete the old livestream archive link and paste the new sermon link into the space.",
-              "Click the Publish button in the upper right corner to push the updated page live.",
-              "Open a live public sermon site incognito tab and verify the new video plays flawlessly."
+        progressivePhases: [
+          {
+            phaseId: "site-phase-1",
+            phaseName: "Phase 1: Sermon-Only YouTube File Replacement Track",
+            subTasks: [
+              { id: "site-p1-s1", title: "Copy the new sermon-only YouTube link from your video manager channel." },
+              { id: "site-p1-s2", title: "Open the sermon site editor page and click the three dots icon next to the video container." },
+              { id: "site-p1-s3", title: "Delete the old livestream archive link and paste the new sermon link into the space." },
+              { id: "site-p1-s4", title: "Click the Publish button in the upper right corner to push the updated page live." },
+              { id: "site-p1-s5", title: "Open a live public sermon site incognito tab and verify the new video plays flawlessly." }
             ]
           }
         ]
@@ -510,8 +510,8 @@ const workflowTabs: WorkflowTab[] = [
   },
 ];
 
-const STORAGE_KEY = "aholiab-checklist-state-v35";
-const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v35";
+const STORAGE_KEY = "aholiab-checklist-state-v36";
+const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v36";
 const EVANGELISM_KEY = "aholiab-evangelism-toggle";
 const FONT_SIZE_KEY = "aholiab-global-font-size";
 const THEME_KEY = "aholiab-global-theme";
@@ -1314,7 +1314,7 @@ export function SermonChecklist() {
                                           id={sub.id}
                                           checked={checkedSubItems[sub.id] || false}
                                           onCheckedChange={(c) => handleSubCheck(item.id, sub.id, c === true)}
-                                          className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:bg-sky-400"
+                                          className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:border-sky-400"
                                         />
                                       </div>
                                       <div className="leading-relaxed">
