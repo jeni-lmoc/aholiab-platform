@@ -111,6 +111,7 @@ interface ChecklistItem {
   title: string;
   description: string;
   isAfterglowRelated?: boolean;
+  hasDynamicEvangelismMapping?: boolean;
   hasManualLink?: boolean;
   progressivePhases?: ProgressivePhase[];
   subTasks?: SubTask[]; 
@@ -175,7 +176,7 @@ const workflowTabs: WorkflowTab[] = [
               },
               { 
                 id: "vt-p2-s2", 
-                title: "Click Continue, switch layout to Freeform with 'Don't Add Images', and wallpaper paste our copied additional instructions into the box on the right.",
+                title: "Click Continue, switch layout to Freeform with 'Don't Add Images', and paste our copied additional instructions into the box on the right.",
                 customButton: { label: "Copy Additional Instructions", actionType: "copy", payload: ADDITIONAL_INSTRUCTIONS_PROMPT }
               },
               { id: "vt-p2-s3", title: "Click Generate. Once complete, run a swift visual scroll to confirm no rogue decorative shapes or graphic items leaked into the layout." },
@@ -478,7 +479,12 @@ const workflowTabs: WorkflowTab[] = [
           }
         ]
       },
-      { id: "website", title: "Sites", description: "Upload the sermon video link, the main slide deck, the study guides, and the combined PDF to the site." },
+      { 
+        id: "website", 
+        title: "Sites", 
+        description: "Upload the sermon video link, the main slide deck, the study guides, and the combined PDF to the site.",
+        hasDynamicEvangelismMapping: true 
+      },
     ],
   },
   {
@@ -505,8 +511,8 @@ const workflowTabs: WorkflowTab[] = [
   },
 ];
 
-const STORAGE_KEY = "aholiab-checklist-state-v38";
-const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v38";
+const STORAGE_KEY = "aholiab-checklist-state-v40";
+const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v40";
 const EVANGELISM_KEY = "aholiab-evangelism-toggle";
 const FONT_SIZE_KEY = "aholiab-global-font-size";
 const THEME_KEY = "aholiab-global-theme";
@@ -589,13 +595,30 @@ export function SermonChecklist() {
     }
   };
 
-  const handleCheck = (id: string, checked: boolean) => {
+  const handleCheck = (id: string, checked: boolean, dynamicItem?: ChecklistItem) => {
     setCheckedItems((prev) => ({ ...prev, [id]: checked }));
     
+    const subUpdates: Record<string, boolean> = {};
+    
+    if (dynamicItem && dynamicItem.hasDynamicEvangelismMapping) {
+      const activePhases = getDynamicWebsitePhases();
+      activePhases.forEach(phase => {
+        phase.subTasks.forEach(sub => {
+          subUpdates[sub.id] = checked;
+          if (sub.nestedSubTasks) {
+            sub.nestedSubTasks.forEach((_, idx) => {
+              subUpdates[`${sub.id}-nest-${idx}`] = checked;
+            });
+          }
+        });
+      });
+      setCheckedSubItems(prev => ({ ...prev, ...subUpdates }));
+      return;
+    }
+
     const item = workflowTabs.flatMap(t => t.items).find(i => i.id === id);
     if (!item) return;
 
-    const subUpdates: Record<string, boolean> = {};
     if (item.progressivePhases) {
       item.progressivePhases.flatMap(p => p.subTasks).forEach(sub => { 
         subUpdates[sub.id] = checked; 
@@ -611,9 +634,24 @@ export function SermonChecklist() {
     setCheckedSubItems(prev => ({ ...prev, ...subUpdates }));
   };
 
-  const handleSubCheck = (parentId: string, subId: string, checked: boolean) => {
+  const handleSubCheck = (parentId: string, subId: string, checked: boolean, isDynamicWebsite?: boolean) => {
     const updatedSubItems = { ...checkedSubItems, [subId]: checked };
     setCheckedSubItems(updatedSubItems);
+
+    if (isDynamicWebsite) {
+      const activePhases = getDynamicWebsitePhases();
+      const allSubTasks = activePhases.flatMap(p => p.subTasks);
+      if (allSubTasks.length > 0) {
+        const allChecked = allSubTasks.every(sub => {
+          if (sub.nestedSubTasks) {
+            return sub.nestedSubTasks.every((_, idx) => updatedSubItems[`${sub.id}-nest-${idx}`]);
+          }
+          return updatedSubItems[sub.id];
+        });
+        setCheckedItems(prev => ({ ...prev, [parentId]: allChecked }));
+      }
+      return;
+    }
 
     const item = workflowTabs.flatMap(t => t.items).find(i => i.id === parentId);
     if (!item) return;
@@ -633,14 +671,22 @@ export function SermonChecklist() {
     }
   };
 
-  const handleNestedSubCheck = (parentId: string, mainSubId: string, nestIdx: number, checked: boolean) => {
+  const handleNestedSubCheck = (parentId: string, mainSubId: string, nestIdx: number, checked: boolean, isDynamicWebsite?: boolean) => {
     const nestKey = `${mainSubId}-nest-${nestIdx}`;
     const updatedSubItems = { ...checkedSubItems, [nestKey]: checked };
     
-    const item = workflowTabs.flatMap(t => t.items).find(i => i.id === parentId);
-    if (!item) return;
+    let mainSubTask;
+    let activePhases: ProgressivePhase[] = [];
 
-    const mainSubTask = item.progressivePhases?.flatMap(p => p.subTasks).find(s => s.id === mainSubId);
+    if (isDynamicWebsite) {
+      activePhases = getDynamicWebsitePhases();
+      mainSubTask = activePhases.flatMap(p => p.subTasks).find(s => s.id === mainSubId);
+    } else {
+      const item = workflowTabs.flatMap(t => t.items).find(i => i.id === parentId);
+      if (!item) return;
+      mainSubTask = item.progressivePhases?.flatMap(p => p.subTasks).find(s => s.id === mainSubId);
+    }
+
     if (mainSubTask && mainSubTask.nestedSubTasks) {
       const allNestedChecked = mainSubTask.nestedSubTasks.every((_, idx) => {
         if (idx === nestIdx) return checked;
@@ -651,9 +697,9 @@ export function SermonChecklist() {
 
     setCheckedSubItems(updatedSubItems);
 
-    const allSubTasks = item.progressivePhases 
-      ? item.progressivePhases.flatMap(p => p.subTasks) 
-      : [];
+    const allSubTasks = isDynamicWebsite 
+      ? activePhases.flatMap(p => p.subTasks)
+      : (workflowTabs.flatMap(t => t.items).find(i => i.id === parentId)?.progressivePhases?.flatMap(p => p.subTasks) || []);
 
     if (allSubTasks.length > 0) {
       const allChecked = allSubTasks.every(sub => {
@@ -664,9 +710,9 @@ export function SermonChecklist() {
           });
         }
         if (sub.nestedSubTasks) {
-          return sub.nestedSubTasks.every((_, idx) => checkedSubItems[`${sub.id}-nest-${idx}`]);
+          return sub.nestedSubTasks.every((_, idx) => updatedSubItems[`${sub.id}-nest-${idx}`]);
         }
-        return checkedSubItems[sub.id];
+        return updatedSubItems[sub.id];
       });
       setCheckedItems(prev => ({ ...prev, [parentId]: allChecked }));
     }
@@ -704,7 +750,166 @@ export function SermonChecklist() {
     setPendingGatekeeperUrl("");
   };
 
+  const getDynamicWebsitePhases = (): ProgressivePhase[] => {
+    return [
+      {
+        phaseId: "site-phase-1",
+        phaseName: "Phase 1: Environment & Profile Prep",
+        subTasks: [
+          {
+            id: "site-p1-s1",
+            title: "Open your Gamma portal directory layout grid home page and safely duplicate the template project context fields:",
+            nestedSubTasks: [
+              "Locate your weekly master website template card option block.",
+              "Click on the three dots icon (...) positioned beside the project name box and click Duplicate.",
+              "STOP & CHECK: Look at your upper-left title layout block banner header. Confirm the string reads 'Copy of Weekly After Live Template' exactly before editing."
+            ]
+          },
+          {
+            id: "site-p1-s2",
+            title: "Access the sub-page directory mapping layouts and rewrite the network domain parameters:",
+            nestedSubTasks: [
+              "Look at your left-hand structural sidebar under the Pages listing tier.",
+              "Hover over Sermon Page Template, click on the three dots icon (...), and launch Page settings and URL path...",
+              "Click on Publishing & domains, tap the three dots beside the active domain block cell, and rename it to a clean short code variant of the sermon title.",
+              "Click Save, then tap the upper-right (X) exit icon to close the parameter drawer."
+            ]
+          },
+          {
+            id: "site-p1-s3",
+            title: "Apply the synchronized theme visuals: Click Theme from the top application bar directory, find your matching custom date or title look theme card, and close the drawer layer."
+          }
+        ]
+      },
+      {
+        phaseId: "site-phase-2",
+        phaseName: "Phase 2: Navigation & URL Configuration",
+        subTasks: [
+          {
+            id: "site-p2-s1",
+            title: "Hover over your separate sub-pages (sermon, slides, afterglow, extended study) inside the left sidebar file hierarchy index to re-route names:",
+            nestedSubTasks: [
+              "Open Sermon Page Template settings row: Update the Title field to a short version of sermon title, and verify the URL path is exactly typed as 'sermon'.",
+              "Click General inside that menu drawer layer and manually rewrite the master Gamma title box string to match the full name of the sermon.",
+              "Select your individual Slides, Afterglow, and Extended Study pages and change ONLY the date string characters to match current Sabbath's service date stamp."
+            ]
+          },
+          ...(isEvangelismSabbath 
+            ? [
+                {
+                  id: "site-p2-s2-evangelism",
+                  title: "HIGH-PRIORITY AFTERGLOW REMOVAL TRACK: Execute these exact deletion loops to scrub the guide frame from the active database profile map:",
+                  nestedSubTasks: [
+                    "Click the 3 dots (...) next to Afterglow inside your sidebar index list and click Archive this page (confirm Yes, Archive).",
+                    "Click on the word Archived at the baseline of the sidebar index. Click the 3 dots beside Afterglow inside that row and click Permanently Delete (confirm).",
+                    "Click on the Afterglow link located on your top navigation header block and click Delete at the baseline of the dropdown parameter window panel."
+                  ]
+                }
+              ]
+            : [
+                {
+                  id: "site-p2-s2-standard",
+                  title: "Update top navigation links row mapping rules: Click directly on a page navigation link text box name on your top container bar row:",
+                  nestedSubTasks: [
+                    "Click inside the URL path parameter entry slot, clear out the placeholder text, and review the recent pages history dropdown loop list.",
+                    "Select the exact correct page string token item that mirrors the text string listed in the Navigation layout cell row.",
+                    "Repeat this execution loop step-by-step to bind and lock all four navigation links cleanly."
+                  ]
+                }
+              ]
+          )
+        ]
+      },
+      {
+        phaseId: "site-phase-3",
+        phaseName: "Phase 3: Core Media Embeds & Content Pasting",
+        subTasks: [
+          {
+            id: "site-p3-s1",
+            title: "Embed the active Sabbath broadcast service video element card frame directly inside your media container slot:",
+            nestedSubTasks: [
+              "Go to YouTube and copy the share link for the current Sabbath's live worship service timeline video.",
+              "Return to Gamma, tap your sermon page container row, and adjust your Sermon Title text layer, speaker fields, and date calendar lines manually if needed.",
+              "Hover your mouse near the upper left side of the gray video frame placeholder preview block box until the 3 dots menu displays.",
+              "Click the 3 dots menu, highlight the link information input field box row, wipe the old text string, and paste the fresh YouTube video link.",
+              "CRITICAL SAVING MANDATE: You MUST click the check mark icon button right next to the new link input container to save the Swap edits!",
+              "Confirm that the proper, real video card successfully parses, runs, and displays on your interface grid window frame."
+            ]
+          },
+          {
+            id: "site-p3-s2",
+            title: "CRITICAL BATCH PROTOCOL: Coordinate in the huddle huddle audio loop to copy and cross-paste cards into the live panel tracks one-at-a-time:",
+            nestedSubTasks: [
+              "Coordinate with builders to ensure you are the only editor active. Open separate browser workspace tabs for your Sermon Slides, Afterglow, and Extended files.",
+              "Select card bodies with Ctrl+A, copy with Ctrl+C, step back into your duplicated template website project drawer, and use Ctrl+V to drop them into their pages.",
+              "Note: If the timeline filmstrip fails to show, tap the Page View icon (positioned between Gamma logo and site title box) at the top-left to expose it."
+            ]
+          },
+          {
+            id: "site-p3-s3",
+            title: "Construct the mobile-friendly alternative download download button for local file storage extraction maps:",
+            nestedSubTasks: [
+              "Navigate back to your main Sermon page view. Click or construct a clean empty section row line directly above the Sermon Name layer text.",
+              "Go to the right-side application menu toolbar pane and click the Webpage icon layout option (labeled 'Embed apps & webpages').",
+              "Select File upload from the menu selections and upload the exact Combined & Compressed PDF file generated during the QR loop phase.",
+              "Once processing ends, click the X to shut the media drawer. Click the Preview dropdown arrow under the slot and select Button.",
+              "Center the button layout box. Click inside the face and type: 'Click here to download a PDF of this week's sermon resources.'"
+            ]
+          }
+        ]
+      },
+      {
+        phaseId: "site-phase-4",
+        phaseName: "Phase 4: Site Publication & Live Domain Audit",
+        subTasks: [
+          {
+            id: "site-p4-s1",
+            title: "Trigger initial publish operations: Click the green Publish button at the upper right corner of the website screen workspace header area:",
+            nestedSubTasks: [
+              "Ensure you are publishing strictly from the SERMON page view block slot to lock the deployment anchor row.",
+              "When the confirmation popup banner spawns, click 'View site' instantly to inspect the public domain layout. (Note: Banner hides automatically after 3 seconds).",
+              "If the layout falls out or fails to fetch, open a duplicate browser pane, click Publish again, and trigger the check loop."
+            ]
+          },
+          {
+            id: "site-p4-s2",
+            title: "[ 🅿️ PARKING LOT PLACEHOLDER ] Launch your church operations manual, open the Afterlive Creation Process document guide, and process the 'Update the After Live site' routine text modifications."
+          },
+          {
+            id: "site-p4-s3",
+            title: "Complete your site deployment logging track to finish the weekly link chain:",
+            nestedSubTasks: [
+              "Copy your freshly generated, public live sermon landing page URL string to your active clipboard tracker.",
+              "Log into Slack, launch your main Weekly Sermon Tracker workspace table, and paste the web link into its tracker row track slot cell."
+            ],
+            inlineButtonUnderNested: { label: "💬 Open Weekly Sermon Tracker", actionType: "link", payload: GLOBAL_LINKS.weeklySermonTracker }
+          }
+        ]
+      }
+    ];
+  };
+
   const getSubProgress = (item: ChecklistItem) => {
+    if (item.hasDynamicEvangelismMapping) {
+      const activePhases = getDynamicWebsitePhases();
+      let completed = 0;
+      let total = 0;
+      activePhases.forEach(phase => {
+        phase.subTasks.forEach(sub => {
+          if (sub.nestedSubTasks) {
+            sub.nestedSubTasks.forEach((_, idx) => {
+              total++;
+              if (checkedSubItems[`${sub.id}-nest-${idx}`]) completed++;
+            });
+          } else {
+            total++;
+            if (checkedSubItems[sub.id]) completed++;
+          }
+        });
+      });
+      return { completed, total, percentage: total > 0 ? Math.round((completed / total) * 100) : 0 };
+    }
+
     const allSubTasks = item.progressivePhases 
       ? item.progressivePhases.flatMap(p => p.subTasks) 
       : (item.subTasks || []);
@@ -1080,7 +1285,7 @@ export function SermonChecklist() {
 
                     {visibleItems.map((item) => {
                       const subProgress = getSubProgress(item);
-                      const hasSubTasks = (item.subTasks && item.subTasks.length > 0) || (item.progressivePhases && item.progressivePhases.length > 0);
+                      const hasSubTasks = (item.subTasks && item.subTasks.length > 0) || (item.progressivePhases && item.progressivePhases.length > 0) || item.hasDynamicEvangelismMapping;
                       const isExpanded = expandedItems[item.id] || false;
 
                       return (
@@ -1099,16 +1304,19 @@ export function SermonChecklist() {
                                 <Checkbox 
                                   id={item.id} 
                                   checked={checkedItems[item.id] || false} 
-                                  onCheckedChange={(c) => handleCheck(item.id, c === true)} 
+                                  onCheckedChange={(c) => handleCheck(item.id, c === true, item)} 
                                   className={`w-5 h-5 rounded-md border-2 transition-all bg-slate-900 ${themeStyles.checkboxBorder}`} 
                                 />
                               </div>
                               <div className="space-y-1 w-full">
                                  <div className={`${fontStyles.taskTitle} font-black tracking-tight transition-all ${checkedItems[item.id] ? "text-slate-500 line-through opacity-60" : themeStyles.taskText}`}>
-                                   {item.title}
+                                   {item.hasDynamicEvangelismMapping ? "Sites" : item.title}
                                  </div>
                                  <div className={`${fontStyles.taskDesc} font-medium leading-relaxed ${checkedItems[item.id] ? "text-slate-600 opacity-40" : themeStyles.taskDesc}`}>
-                                   {item.description}
+                                   {item.hasDynamicEvangelismMapping 
+                                     ? "Upload sermon links, slide decks, study guides, and alternative master PDFs into the church public portal copies."
+                                     : item.description
+                                   }
                                  </div>
                               </div>
                             </label>
@@ -1168,152 +1376,160 @@ export function SermonChecklist() {
                               )}
 
                               {/* CONDITIONAL NESTED ACCORDION MATRIX ENGINE */}
-                              {item.progressivePhases ? (
-                                item.progressivePhases.map((phase) => {
-                                  const isPhaseOpen = expandedPhases[phase.phaseId] || false;
-                                  return (
-                                    <Card key={phase.phaseId} className="border border-slate-900/60 bg-slate-950/40 rounded-xl overflow-hidden shadow-md">
-                                      <Button
-                                        variant="ghost"
-                                        onClick={(e) => setExpandedPhases(p => ({ ...p, [phase.phaseId]: !isPhaseOpen }))}
-                                        className={`w-full justify-between h-11 px-4 text-xs font-black uppercase tracking-widest rounded-none border-b border-slate-950 transition-colors ${
-                                          isPhaseOpen ? "bg-sky-500/5 text-sky-400" : "bg-slate-950 text-slate-400 hover:text-slate-100"
-                                        }`}
-                                      >
-                                        <div className="flex items-center gap-2">
-                                          <div className={`w-1 h-3 rounded-full bg-sky-400 transition-transform ${isPhaseOpen ? "scale-y-120" : "scale-y-50"}`} />
-                                          <span className={`${fontStyles.phaseHeader} font-black uppercase`}>
-                                            {phase.phaseName}
-                                          </span>
-                                        </div>
-                                        {isPhaseOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-                                      </Button>
+                              {(() => {
+                                const activePhases = item.hasDynamicEvangelismMapping 
+                                  ? getDynamicWebsitePhases() 
+                                  : (item.progressivePhases || []);
 
-                                      {isPhaseOpen && (
-                                        <div className="p-3 bg-black/10 space-y-2.5 animate-in slide-in-from-top-1 duration-200">
-                                          {phase.subTasks.map((sub) => (
-                                            <div 
-                                              key={sub.id} 
-                                              className={`flex flex-col p-3 rounded-lg border transition-all ${
-                                                checkedSubItems[sub.id]
-                                                  ? "bg-slate-950/20 border-transparent opacity-45"
-                                                  : "bg-slate-950/50 border-slate-900/60 hover:border-sky-500/20 hover:bg-slate-950/80"
-                                              }`}
-                                            >
-                                              <label className={`flex items-start gap-3.5 font-semibold cursor-pointer select-none ${fontStyles.subTaskTitle} ${checkedSubItems[sub.id] ? "line-through text-slate-500" : "text-slate-200"}`}>
-                                                <div className="pt-0.5 shrink-0">
-                                                  <Checkbox
-                                                    id={sub.id}
-                                                    checked={checkedSubItems[sub.id] || false}
-                                                    onCheckedChange={(c) => handleSubCheck(item.id, sub.id, c === true)}
-                                                    className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:border-sky-400"
-                                                  />
-                                                </div>
-                                                <div className="leading-relaxed flex-1">
-                                                  {sub.title}
-                                                </div>
-                                              </label>
+                                if (activePhases.length > 0) {
+                                  return activePhases.map((phase) => {
+                                    const isPhaseOpen = expandedPhases[phase.phaseId] || false;
+                                    return (
+                                      <Card key={phase.phaseId} className="border border-slate-900/60 bg-slate-950/40 rounded-xl overflow-hidden shadow-md">
+                                        <Button
+                                          variant="ghost"
+                                          onClick={(e) => setExpandedPhases(p => ({ ...p, [phase.phaseId]: !isPhaseOpen }))}
+                                          className={`w-full justify-between h-11 px-4 text-xs font-black uppercase tracking-widest rounded-none border-b border-slate-950 transition-colors ${
+                                            isPhaseOpen ? "bg-sky-500/5 text-sky-400" : "bg-slate-950 text-slate-400 hover:text-slate-100"
+                                          }`}
+                                        >
+                                          <div className="flex items-center gap-2">
+                                            <div className={`w-1 h-3 rounded-full bg-sky-400 transition-transform ${isPhaseOpen ? "scale-y-120" : "scale-y-50"}`} />
+                                            <span className={`${fontStyles.phaseHeader} font-black uppercase`}>
+                                              {phase.phaseName}
+                                            </span>
+                                          </div>
+                                          {isPhaseOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                                        </Button>
 
-                                              {/* HIGHLY OPTIMIZED FLEXIBLE INDENTED NESTED BULLET TRACKER ENGINE */}
-                                              {sub.nestedSubTasks && (
-                                                <div className="pl-7 mt-2 space-y-2 border-l border-slate-800/60 ml-2">
-                                                  {sub.nestedSubTasks.map((nestTitle, nestIdx) => (
-                                                    <label 
-                                                      key={nestIdx} 
-                                                      className={`flex items-start gap-3 cursor-pointer select-none ${fontStyles.subTaskTitle} ${
-                                                        checkedSubItems[`${sub.id}-nest-${nestIdx}`] ? "line-through text-slate-500 opacity-60" : "text-slate-300"
+                                        {isPhaseOpen && (
+                                          <div className="p-3 bg-black/10 space-y-2.5 animate-in slide-in-from-top-1 duration-200">
+                                            {phase.subTasks.map((sub) => (
+                                              <div 
+                                                key={sub.id} 
+                                                className={`flex flex-col p-3 rounded-lg border transition-all ${
+                                                  checkedSubItems[sub.id]
+                                                    ? "bg-slate-950/20 border-transparent opacity-45"
+                                                    : "bg-slate-950/50 border-slate-900/60 hover:border-sky-500/20 hover:bg-slate-950/80"
+                                                }`}
+                                              >
+                                                <label className={`flex items-start gap-3.5 font-semibold cursor-pointer select-none ${fontStyles.subTaskTitle} ${checkedSubItems[sub.id] ? "line-through text-slate-500" : "text-slate-200"}`}>
+                                                  <div className="pt-0.5 shrink-0">
+                                                    <Checkbox
+                                                      id={sub.id}
+                                                      checked={checkedSubItems[sub.id] || false}
+                                                      onCheckedChange={(c) => handleSubCheck(item.id, sub.id, c === true, item.hasDynamicEvangelismMapping)}
+                                                      className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:border-sky-400"
+                                                    />
+                                                  </div>
+                                                  <div className="leading-relaxed flex-1">
+                                                    {sub.title}
+                                                  </div>
+                                                </label>
+
+                                                {/* HIGHLY OPTIMIZED FLEXIBLE INDENTED NESTED BULLET TRACKER ENGINE */}
+                                                {sub.nestedSubTasks && (
+                                                  <div className="pl-7 mt-2 space-y-2 border-l border-slate-800/60 ml-2">
+                                                    {sub.nestedSubTasks.map((nestTitle, nestIdx) => (
+                                                      <label 
+                                                        key={nestIdx} 
+                                                        className={`flex items-start gap-3 cursor-pointer select-none ${fontStyles.subTaskTitle} ${
+                                                          checkedSubItems[`${sub.id}-nest-${nestIdx}`] ? "line-through text-slate-500 opacity-60" : "text-slate-300"
+                                                        }`}
+                                                      >
+                                                        <div className="pt-0.5 shrink-0">
+                                                          <Checkbox
+                                                            id={`${sub.id}-nest-${nestIdx}`}
+                                                            checked={checkedSubItems[`${sub.id}-nest-${nestIdx}`] || false}
+                                                            onCheckedChange={(c) => handleNestedSubCheck(item.id, sub.id, nestIdx, c === true, item.hasDynamicEvangelismMapping)}
+                                                            className="w-3.5 h-3.5 rounded border-slate-600 data-[state=checked]:bg-sky-500 data-[state=checked]:bg-sky-500"
+                                                          />
+                                                        </div>
+                                                        <div className="leading-normal flex-1">
+                                                          {nestTitle}
+                                                        </div>
+                                                      </label>
+                                                    ))}
+                                                  </div>
+                                                )}
+
+                                                {sub.inlineButtonUnderNested && (
+                                                  <div className="pl-7 mt-3">
+                                                    <Button
+                                                      variant="outline"
+                                                      size="sm"
+                                                      onClick={() => handleActionClick(sub.inlineButtonUnderNested, sub.id)}
+                                                      className={`rounded uppercase tracking-wider border-sky-500/20 text-sky-400 bg-sky-500/[0.02] hover:bg-sky-500/10 hover:text-sky-300 transition-all ${fontStyles.subTaskBtn}`}
+                                                    >
+                                                      <ExternalLink className="h-3 w-3 mr-1.5 shrink-0" /> {sub.inlineButtonUnderNested.label}
+                                                    </Button>
+                                                  </div>
+                                                )}
+
+                                                {sub.customButton && (
+                                                  <div className="pl-7.5 mt-2.5">
+                                                    <Button
+                                                      variant="outline"
+                                                      size="sm"
+                                                      onClick={() => handleActionClick(sub.customButton, sub.id)}
+                                                      className={`rounded uppercase tracking-wider border-sky-500/20 text-sky-400 bg-sky-500/[0.02] hover:bg-sky-500/10 hover:text-sky-300 transition-all ${fontStyles.subTaskBtn} ${
+                                                        sub.customButton.actionType.startsWith("gatekeeper") && copiedStatus[sub.id]
+                                                          ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
+                                                          : ""
                                                       }`}
                                                     >
-                                                      <div className="pt-0.5 shrink-0">
-                                                        <Checkbox
-                                                          id={`${sub.id}-nest-${nestIdx}`}
-                                                          checked={checkedSubItems[`${sub.id}-nest-${nestIdx}`] || false}
-                                                          onCheckedChange={(c) => handleNestedSubCheck(item.id, sub.id, nestIdx, c === true)}
-                                                          className="w-3.5 h-3.5 rounded border-slate-600 data-[state=checked]:bg-sky-500 data-[state=checked]:bg-sky-500"
-                                                        />
-                                                      </div>
-                                                      <div className="leading-normal flex-1">
-                                                        {nestTitle}
-                                                      </div>
-                                                    </label>
-                                                  ))}
-                                                </div>
-                                              )}
-
-                                              {sub.inlineButtonUnderNested && (
-                                                <div className="pl-7 mt-3">
-                                                  <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => handleActionClick(sub.inlineButtonUnderNested, sub.id)}
-                                                    className={`rounded uppercase tracking-wider border-sky-500/20 text-sky-400 bg-sky-500/[0.02] hover:bg-sky-500/10 hover:text-sky-300 transition-all ${fontStyles.subTaskBtn}`}
-                                                  >
-                                                    <ExternalLink className="h-3 w-3 mr-1.5 shrink-0" /> {sub.inlineButtonUnderNested.label}
-                                                  </Button>
-                                                </div>
-                                              )}
-
-                                              {sub.customButton && (
-                                                <div className="pl-7.5 mt-2.5">
-                                                  <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => handleActionClick(sub.customButton, sub.id)}
-                                                    className={`rounded uppercase tracking-wider border-sky-500/20 text-sky-400 bg-sky-500/[0.02] hover:bg-sky-500/10 hover:text-sky-300 transition-all ${fontStyles.subTaskBtn} ${
-                                                      sub.customButton.actionType.startsWith("gatekeeper") && copiedStatus[sub.id]
-                                                        ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
-                                                        : ""
-                                                    }`}
-                                                  >
-                                                    {sub.customButton.actionType === "copy" ? (
-                                                      copiedStatus[sub.id] ? (
-                                                        <><Check className="h-3 w-3 mr-1.5 shrink-0" /> Copied!</>
+                                                      {sub.customButton.actionType === "copy" ? (
+                                                        copiedStatus[sub.id] ? (
+                                                          <><Check className="h-3 w-3 mr-1.5 shrink-0" /> Copied!</>
+                                                        ) : (
+                                                          <><Copy className="h-3 w-3 mr-1.5 shrink-0" /> {sub.customButton.label}</>
+                                                        )
                                                       ) : (
-                                                        <><Copy className="h-3 w-3 mr-1.5 shrink-0" /> {sub.customButton.label}</>
-                                                      )
-                                                    ) : (
-                                                      <><ExternalLink className="h-3 w-3 mr-1.5 shrink-0" /> {sub.customButton.label}</>
-                                                    )}
-                                                  </Button>
-                                                </div>
-                                              )}
-                                            </div>
-                                          ))}
-                                        </div>
-                                      )}
-                                    </Card>
-                                  );
-                                })
-                              ) : (
+                                                        <><ExternalLink className="h-3 w-3 mr-1.5 shrink-0" /> {sub.customButton.label}</>
+                                                      )}
+                                                    </Button>
+                                                  </div>
+                                                )}
+                                              </div>
+                                            ))}
+                                          </div>
+                                        )}
+                                      </Card>
+                                    );
+                                  });
+                                }
+
                                 // STANDARD FLAT STRIP RE-RENDER
-                                <div className="space-y-2.5">
-                                  <div className="text-[10px] font-black uppercase tracking-[0.15em] text-sky-400/80 mb-1">
-                                    Step-by-Step Training Breakdown
+                                return (
+                                  <div className="space-y-2.5">
+                                    <div className="text-[10px] font-black uppercase tracking-[0.15em] text-sky-400/80 mb-1">
+                                      Step-by-Step Training Breakdown
+                                    </div>
+                                    {item.subTasks?.map((sub) => (
+                                      <label 
+                                        key={sub.id}
+                                        className={`flex items-start gap-3.5 p-3 rounded-lg border font-semibold cursor-pointer select-none transition-all ${fontStyles.subTaskTitle} ${
+                                          checkedSubItems[sub.id]
+                                            ? "bg-slate-950/20 border-transparent opacity-40 line-through text-slate-500"
+                                            : "bg-slate-950/50 border-slate-900/60 text-slate-200 hover:border-sky-500/30 hover:bg-slate-950/80"
+                                        }`}
+                                      >
+                                        <div className="pt-0.5 shrink-0">
+                                          <Checkbox
+                                            id={sub.id}
+                                            checked={checkedSubItems[sub.id] || false}
+                                            onCheckedChange={(c) => handleSubCheck(item.id, sub.id, c === true)}
+                                            className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:border-sky-400"
+                                          />
+                                        </div>
+                                        <div className="leading-relaxed">
+                                          {sub.title}
+                                        </div>
+                                      </label>
+                                    ))}
                                   </div>
-                                  {item.subTasks?.map((sub) => (
-                                    <label 
-                                      key={sub.id}
-                                      className={`flex items-start gap-3.5 p-3 rounded-lg border font-semibold cursor-pointer select-none transition-all ${fontStyles.subTaskTitle} ${
-                                        checkedSubItems[sub.id]
-                                          ? "bg-slate-950/20 border-transparent opacity-40 line-through text-slate-500"
-                                          : "bg-slate-950/50 border-slate-900/60 text-slate-200 hover:border-sky-500/30 hover:bg-slate-950/80"
-                                      }`}
-                                    >
-                                      <div className="pt-0.5 shrink-0">
-                                        <Checkbox
-                                          id={sub.id}
-                                          checked={checkedSubItems[sub.id] || false}
-                                          onCheckedChange={(c) => handleSubCheck(item.id, sub.id, c === true)}
-                                          className="w-4 h-4 rounded border-slate-500 data-[state=checked]:bg-sky-400 data-[state=checked]:border-sky-400"
-                                        />
-                                      </div>
-                                      <div className="leading-relaxed">
-                                        {sub.title}
-                                      </div>
-                                    </label>
-                                  ))}
-                                </div>
-                              )}
+                                );
+                              })()}
 
                             </div>
                           )}
