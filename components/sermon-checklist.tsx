@@ -290,7 +290,7 @@ const workflowTabs: WorkflowTab[] = [
                 title: "Navigate to the Additional Instructions text box on the far right and paste our official Afterglow prompt.",
                 customButton: { label: "📋 Copy Afterglow Prompt", actionType: "copy", payload: AFTERGLOW_STUDY_PROMPT }
               },
-              { id: "ag-p2-s3", title: "Click Generate to cast your foundational discussion guide layout." }
+              { id: "ag-p2-s3", title: "Click Generate to cast your foundational discussion layout." }
             ]
           },
           {
@@ -511,8 +511,8 @@ const workflowTabs: WorkflowTab[] = [
   },
 ];
 
-const STORAGE_KEY = "aholiab-checklist-state-v40";
-const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v40";
+const STORAGE_KEY = "aholiab-checklist-state-v41";
+const SUB_STORAGE_KEY = "aholiab-subchecklist-state-v41";
 const EVANGELISM_KEY = "aholiab-evangelism-toggle";
 const FONT_SIZE_KEY = "aholiab-global-font-size";
 const THEME_KEY = "aholiab-global-theme";
@@ -754,66 +754,96 @@ export function SermonChecklist() {
     return [
       {
         phaseId: "site-phase-1",
-        phaseName: "Phase 1: Environment & Profile Prep",
+        phaseName: "Phase 1: Environment & Website Setup",
         subTasks: [
           {
             id: "site-p1-s1",
-            title: "Open your Gamma portal directory layout grid home page and safely duplicate the template project context fields:",
+            title: "Open Gamma. On the left-hand navigation bar, click on Sites. Locate the project card named \"TEMPLATE Weekly Sermon Site\":",
             nestedSubTasks: [
-              "Locate your weekly master website template card option block.",
-              "Click on the three dots icon (...) positioned beside the project name box and click Duplicate.",
-              "STOP & CHECK: Look at your upper-left title layout block banner header. Confirm the string reads 'Copy of Weekly After Live Template' exactly before editing."
+              "Click on the three dots icon (...) positioned beside the project name box.",
+              "Click Duplicate from the menu options.",
+              "STOP & CHECK: Look at the upper-left title header. Confirm the text reads \"Copy of TEMPLATE Weekly Sermon Site\" before making any edits to ensure you are safe."
             ]
           },
           {
             id: "site-p1-s2",
-            title: "Access the sub-page directory mapping layouts and rewrite the network domain parameters:",
+            title: "Change the custom web address to match the sermon title:",
             nestedSubTasks: [
-              "Look at your left-hand structural sidebar under the Pages listing tier.",
-              "Hover over Sermon Page Template, click on the three dots icon (...), and launch Page settings and URL path...",
-              "Click on Publishing & domains, tap the three dots beside the active domain block cell, and rename it to a clean short code variant of the sermon title.",
-              "Click Save, then tap the upper-right (X) exit icon to close the parameter drawer."
+              "Look at the left sidebar menu under the Pages listing.",
+              "Hover over Sermon Page Template, click on the three dots (...), and select Page settings and URL path...",
+              "Click on Publishing & domains inside the menu window.",
+              "Click the three dots (...) to the right of the domain block, and rename it to a clean, short version of today's sermon title.",
+              "Click Save, then click the X icon in the upper right to close the window."
             ]
           },
           {
             id: "site-p1-s3",
-            title: "Apply the synchronized theme visuals: Click Theme from the top application bar directory, find your matching custom date or title look theme card, and close the drawer layer."
+            title: "Select the matching custom graphic theme for today's service:",
+            nestedSubTasks: [
+              "Click Theme in the top application menu bar.",
+              "From the custom themes panel directory, click on the theme that matches today's date or sermon look.",
+              "Click the close button to exit the theme panel."
+            ]
           }
         ]
       },
       {
         phaseId: "site-phase-2",
-        phaseName: "Phase 2: Navigation & URL Configuration",
+        phaseName: "Phase 2: Page Titles, URL Paths, & Navigation Links",
         subTasks: [
           {
             id: "site-p2-s1",
-            title: "Hover over your separate sub-pages (sermon, slides, afterglow, extended study) inside the left sidebar file hierarchy index to re-route names:",
+            title: "Update Page Titles and URL Paths:",
             nestedSubTasks: [
-              "Open Sermon Page Template settings row: Update the Title field to a short version of sermon title, and verify the URL path is exactly typed as 'sermon'.",
-              "Click General inside that menu drawer layer and manually rewrite the master Gamma title box string to match the full name of the sermon.",
-              "Select your individual Slides, Afterglow, and Extended Study pages and change ONLY the date string characters to match current Sabbath's service date stamp."
+              "From the pages on the left side, hover to the right of Sermon Page Template and click on the 3 dots.",
+              "Select Page settings and URL path...",
+              "Change the Title to a short version of the sermon title.",
+              "Ensure that the URL path is exactly the word \"sermon\".",
+              "Click General (inside that same pop-up window) and change the Gamma title to the name of the sermon."
             ]
           },
           ...(isEvangelismSabbath 
             ? [
                 {
                   id: "site-p2-s2-evangelism",
-                  title: "HIGH-PRIORITY AFTERGLOW REMOVAL TRACK: Execute these exact deletion loops to scrub the guide frame from the active database profile map:",
+                  title: "Archive Afterglow Page (Evangelism Sabbath Mode Triggered):",
                   nestedSubTasks: [
-                    "Click the 3 dots (...) next to Afterglow inside your sidebar index list and click Archive this page (confirm Yes, Archive).",
-                    "Click on the word Archived at the baseline of the sidebar index. Click the 3 dots beside Afterglow inside that row and click Permanently Delete (confirm).",
-                    "Click on the Afterglow link located on your top navigation header block and click Delete at the baseline of the dropdown parameter window panel."
+                    "Click on the 3 dots next to Afterglow on the left menu.",
+                    "Choose Archive this page and click Yes, Archive to confirm.",
+                    "Click on the word Archived at the bottom of the menu (may take a minute to show up).",
+                    "Click on the 3 dots and select Permanently Delete (confirm by clicking Permanently Delete again).",
+                    "After updating the remaining page titles, click on the X in the upper right-hand corner to close the window."
+                  ]
+                },
+                {
+                  id: "site-p2-s3-evangelism",
+                  title: "Remove Afterglow Navigation Link (Evangelism Sabbath Mode Triggered):",
+                  nestedSubTasks: [
+                    "Click on the Afterglow link on the top bar.",
+                    "Click on Delete at the bottom of the dropdown window.",
+                    "Click on the remaining navigation links, clear the URL path text, and select the correct matching pages from the drop-down to update them."
                   ]
                 }
               ]
             : [
                 {
                   id: "site-p2-s2-standard",
-                  title: "Update top navigation links row mapping rules: Click directly on a page navigation link text box name on your top container bar row:",
+                  title: "Update Dates on the Resource Pages:",
                   nestedSubTasks: [
-                    "Click inside the URL path parameter entry slot, clear out the placeholder text, and review the recent pages history dropdown loop list.",
-                    "Select the exact correct page string token item that mirrors the text string listed in the Navigation layout cell row.",
-                    "Repeat this execution loop step-by-step to bind and lock all four navigation links cleanly."
+                    "Select the Slides page, hover to the right, click the 3 dots, select page settings, and change ONLY the date to the current sermon date.",
+                    "Select the Afterglow page, hover to the right, click the 3 dots, select page settings, and change ONLY the date to the current sermon date.",
+                    "Select the Extended Study page, hover to the right, click the 3 dots, select page settings, and change ONLY the date to the current sermon date.",
+                    "After updating all of the page titles, click on the X in the upper right-hand corner to close the window."
+                  ]
+                },
+                {
+                  id: "site-p2-s3-standard",
+                  title: "Update Navigation Links:",
+                  nestedSubTasks: [
+                    "Click on a navigation link (the page names on the top bar).",
+                    "Click in the URL path, select and delete the text. You'll be able to see the drop-down of recent pages.",
+                    "Select the correct page to match the text in the Navigation link.",
+                    "Repeat to update all four links."
                   ]
                 }
               ]
@@ -822,116 +852,115 @@ export function SermonChecklist() {
       },
       {
         phaseId: "site-phase-3",
-        phaseName: "Phase 3: Core Media Embeds & Content Pasting",
+        phaseName: "Phase 3: Update Sermon Page & Paste Content",
         subTasks: [
           {
             id: "site-p3-s1",
-            title: "Embed the active Sabbath broadcast service video element card frame directly inside your media container slot:",
+            title: "Update Sermon Page Video and Details:",
             nestedSubTasks: [
-              "Go to YouTube and copy the share link for the current Sabbath's live worship service timeline video.",
-              "Return to Gamma, tap your sermon page container row, and adjust your Sermon Title text layer, speaker fields, and date calendar lines manually if needed.",
-              "Hover your mouse near the upper left side of the gray video frame placeholder preview block box until the 3 dots menu displays.",
-              "Click the 3 dots menu, highlight the link information input field box row, wipe the old text string, and paste the fresh YouTube video link.",
-              "CRITICAL SAVING MANDATE: You MUST click the check mark icon button right next to the new link input container to save the Swap edits!",
-              "Confirm that the proper, real video card successfully parses, runs, and displays on your interface grid window frame."
+              "Go to YouTube and copy the link for the current Sabbath worship service.",
+              "Click on your main sermon page on the left.",
+              "Update the Sermon Title.",
+              "If needed, update the speaker name.",
+              "Update the date.",
+              "Hover the mouse beside the upper left side of the picture of the video until the 3 dots display, and click them.",
+              "Click in the link information box, delete the current link information, and replace it with the link for this week's worship service.",
+              "CRITICAL: Click the checkmark or it won't save! Ensure that the proper video card loads."
             ]
           },
           {
             id: "site-p3-s2",
-            title: "CRITICAL BATCH PROTOCOL: Coordinate in the huddle huddle audio loop to copy and cross-paste cards into the live panel tracks one-at-a-time:",
+            title: "Paste Media Content (Pasting Window Protocol):",
             nestedSubTasks: [
-              "Coordinate with builders to ensure you are the only editor active. Open separate browser workspace tabs for your Sermon Slides, Afterglow, and Extended files.",
-              "Select card bodies with Ctrl+A, copy with Ctrl+C, step back into your duplicated template website project drawer, and use Ctrl+V to drop them into their pages.",
-              "Note: If the timeline filmstrip fails to show, tap the Page View icon (positioned between Gamma logo and site title box) at the top-left to expose it."
+              "Coordinate in your Zoom/Slack Huddle to ensure you are the only person pasting slides right now to prevent file corruption.",
+              "Have the person who created the sermon slides copy their cards with Ctrl+A and Ctrl+C, open this master site copy, and paste them into the Slides page with Ctrl+V. Declare when you are clear.",
+              "Have the study guide creators follow the same one-at-a-time rule to copy and paste their cards into the study guide pages sections.",
+              "Note: You may need to turn off Page View in the upper left-hand corner, between the Gamma icon and the website name, so you can see film strip view."
             ]
           },
           {
             id: "site-p3-s3",
-            title: "Construct the mobile-friendly alternative download download button for local file storage extraction maps:",
+            title: "Add QR Code Alternative Button:",
             nestedSubTasks: [
-              "Navigate back to your main Sermon page view. Click or construct a clean empty section row line directly above the Sermon Name layer text.",
-              "Go to the right-side application menu toolbar pane and click the Webpage icon layout option (labeled 'Embed apps & webpages').",
-              "Select File upload from the menu selections and upload the exact Combined & Compressed PDF file generated during the QR loop phase.",
-              "Once processing ends, click the X to shut the media drawer. Click the Preview dropdown arrow under the slot and select Button.",
-              "Center the button layout box. Click inside the face and type: 'Click here to download a PDF of this week's sermon resources.'"
+              "Note: This step can only be performed after the QR code process is complete. If you do not have the master compressed PDF file, immediately ask your point of contact in the huddle to get it.",
+              "Navigate to the main Sermon page.",
+              "Click on the temporary placeholder button block located directly above the Sermon Name and delete it.",
+              "Click or add a fresh blank line directly above the Sermon Name text.",
+              "On the right-side menu bar, locate the icon that looks like a webpage (labeled “Embed apps & webpages”) and click it.",
+              "Click on File upload from the menu options.",
+              "Upload the same combined and compressed PDF file that was created during the QR code process.",
+              "Once it finishes processing, click the X to close the Media panel.",
+              "In the pop-up box beneath the uploaded file, click the dropdown arrow next to Preview and select Button.",
+              "Center the button block. (Optional: You can adjust the button's style and appearance to your preference.)",
+              "Click directly inside the button face and change the text to exactly: “Click here to download a PDF of this week's sermon resources.”"
             ]
           }
         ]
       },
       {
         phaseId: "site-phase-4",
-        phaseName: "Phase 4: Site Publication & Live Domain Audit",
+        phaseName: "Phase 4: Site Publication & Sermon Tracker Logging",
         subTasks: [
           {
             id: "site-p4-s1",
-            title: "Trigger initial publish operations: Click the green Publish button at the upper right corner of the website screen workspace header area:",
+            title: "Publish Weekly Site:",
             nestedSubTasks: [
-              "Ensure you are publishing strictly from the SERMON page view block slot to lock the deployment anchor row.",
-              "When the confirmation popup banner spawns, click 'View site' instantly to inspect the public domain layout. (Note: Banner hides automatically after 3 seconds).",
-              "If the layout falls out or fails to fetch, open a duplicate browser pane, click Publish again, and trigger the check loop."
+              "At the top right corner of your weekly sermon site, click Publish (make sure you are standing on the main SERMON page while clicking this). This will make the site live and ready to be linked to the Master After Live website.",
+              "A pop-up that says View site will display. Click on the link. (It will disappear in about 3 seconds—if you miss it, just click publish again and click the link).",
+              "Review the opened tab to confirm the correct Sermon page displays properly."
             ]
           },
           {
             id: "site-p4-s2",
-            title: "[ 🅿️ PARKING LOT PLACEHOLDER ] Launch your church operations manual, open the Afterlive Creation Process document guide, and process the 'Update the After Live site' routine text modifications."
+            title: "Sermon Tracker Housekeeping:",
+            nestedSubTasks: [
+              "Click Share on the top menu bar of your published Gamma site.",
+              "Select Copy link from the sharing settings window panel.",
+              "Open the Weekly Sermon Tracker in Slack, locate today's active row track list, and paste your copied view-only Gamma Site URL directly into the proper column track cell.",
+              "Click the checkbox to mark the Website Live milestone as complete.",
+              "Note: Keep this link on your clipboard! You will use it to link the title in Phase 5 below."
+            ]
+          }
+        ]
+      },
+      {
+        phaseId: "site-phase-5",
+        phaseName: "Phase 5: Update the After Live! Master Site",
+        subTasks: [
+          {
+            id: "site-p5-s1",
+            title: "Open the After Live Master Site:",
+            nestedSubTasks: [
+              "Go into Gamma, and on the left sidebar navigation layout panel, click Sites.",
+              "Locate the master website named \"After Live Slide Studies and Sermons Oh My!\" (Black and gold card block).",
+              "Click it to open the site in edit workspace mode."
+            ]
           },
           {
-            id: "site-p4-s3",
-            title: "Complete your site deployment logging track to finish the weekly link chain:",
+            id: "site-p5-s2",
+            title: "Add the New Sermon to the Table of Contents:",
             nestedSubTasks: [
-              "Copy your freshly generated, public live sermon landing page URL string to your active clipboard tracker.",
-              "Log into Slack, launch your main Weekly Sermon Tracker workspace table, and paste the web link into its tracker row track slot cell."
-            ],
-            inlineButtonUnderNested: { label: "💬 Open Weekly Sermon Tracker", actionType: "link", payload: GLOBAL_LINKS.weeklySermonTracker }
+              "Scroll down to the Table of Contents section on the page.",
+              "Add a clean new text line directly above the last sermon entry (newest sermons are always listed first).",
+              "Type out the new service entry using this exact format: Sermon Name - MM.DD.YY (Month.Day.Year).",
+              "Change the font color of the text you just typed to match the document theme color (Gold)."
+            ]
+          },
+          {
+            id: "site-p5-s3",
+            title: "Link the Sermon Title & Execute Safety Check:",
+            nestedSubTasks: [
+              "Highlight the sermon title text line you just typed out.",
+              "Click the Add Link option from the formatting toolbar.",
+              "Paste your new weekly sermon site URL into the destination box link input slot.",
+              "Note: If the link is no longer on your clipboard, open a new tab in Gamma -> Go to Sites -> Click your new weekly sermon site -> Click the three dots at the bottom -> click View Live Site, and copy the address.",
+              "Click Publish at the top right header menu of the master After Live website to push your changes live to the public directory domain.",
+              "CRITICAL AUDIT: Open an incognito browser pane, click through the new Table of Contents link, and verify it goes directly to the landing page flawlessly. IF it shows a pop-up saying 'You are now leaving Gamma', the hyperlink formatting is broken—STOP and contact your point of contact immediately to resolve it!"
+            ]
           }
         ]
       }
     ];
-  };
-
-  const getSubProgress = (item: ChecklistItem) => {
-    if (item.hasDynamicEvangelismMapping) {
-      const activePhases = getDynamicWebsitePhases();
-      let completed = 0;
-      let total = 0;
-      activePhases.forEach(phase => {
-        phase.subTasks.forEach(sub => {
-          if (sub.nestedSubTasks) {
-            sub.nestedSubTasks.forEach((_, idx) => {
-              total++;
-              if (checkedSubItems[`${sub.id}-nest-${idx}`]) completed++;
-            });
-          } else {
-            total++;
-            if (checkedSubItems[sub.id]) completed++;
-          }
-        });
-      });
-      return { completed, total, percentage: total > 0 ? Math.round((completed / total) * 100) : 0 };
-    }
-
-    const allSubTasks = item.progressivePhases 
-      ? item.progressivePhases.flatMap(p => p.subTasks) 
-      : (item.subTasks || []);
-
-    if (allSubTasks.length === 0) return { completed: 0, total: 0, percentage: 0 };
-    
-    let completed = 0;
-    let total = 0;
-
-    allSubTasks.forEach(sub => {
-      if (sub.nestedSubTasks) {
-        sub.nestedSubTasks.forEach((_, idx) => {
-          total++;
-          if (checkedSubItems[`${sub.id}-nest-${idx}`]) completed++;
-        });
-      } else {
-        total++;
-        if (checkedSubItems[sub.id]) completed++;
-      }
-    });
-
-    return { completed, total, percentage: total > 0 ? Math.round((completed / total) * 100) : 0 };
   };
 
   const getTabProgress = (tab: WorkflowTab) => {
@@ -1443,7 +1472,7 @@ export function SermonChecklist() {
                                                             checked={checkedSubItems[`${sub.id}-nest-${nestIdx}`] || false}
                                                             onCheckedChange={(c) => handleNestedSubCheck(item.id, sub.id, nestIdx, c === true, item.hasDynamicEvangelismMapping)}
                                                             className="w-3.5 h-3.5 rounded border-slate-600 data-[state=checked]:bg-sky-500 data-[state=checked]:bg-sky-500"
-                                                          />
+                                                        />
                                                         </div>
                                                         <div className="leading-normal flex-1">
                                                           {nestTitle}
